@@ -1,0 +1,5 @@
+# Api
+fastapi[standard]
+# Linting and formatting
+ruff
+pre-commit
