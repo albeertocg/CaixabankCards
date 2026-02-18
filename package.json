@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "fastapi": "^0.0.8",
+    "pre-commit": "^1.0.10",
+    "ruff": "^1.5.4"
+  }
+}
