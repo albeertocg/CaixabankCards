@@ -1,5 +1,10 @@
 # Api
 fastapi[standard]
+# Database
+pymongo
+python-dotenv
+# Data generation
+faker
 # Linting and formatting
 ruff
 pre-commit
