@@ -3,3 +3,4 @@ fastapi[standard]
 # Linting and formatting
 ruff
 pre-commit
+gower-exp
