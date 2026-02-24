@@ -12,3 +12,4 @@ httpx
 # Linting and formatting
 ruff
 pre-commit
+gower-exp
