@@ -5,6 +5,8 @@ pymongo
 python-dotenv
 # Data generation
 faker
+# AI
+google-genai
 # Linting and formatting
 ruff
 pre-commit
