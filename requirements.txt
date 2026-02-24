@@ -1,5 +1,14 @@
 # Api
 fastapi[standard]
+# Base de datos
+motor
+# Autenticación
+passlib[bcrypt]
+python-jose[cryptography]
+python-dotenv
+pydantic[email]
+# Testing
+httpx
 # Linting and formatting
 ruff
 pre-commit

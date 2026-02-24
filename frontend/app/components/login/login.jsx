@@ -18,9 +18,10 @@ async function loginHandler(user, router, setError) {
 
         if (response.ok) {
             const data = await response.json();
-            // Guardamos los datos del usuario en localStorage (sin token)
-            localStorage.setItem('user', JSON.stringify(data));
-            router.push('/dashboard');
+            // Guardamos el token JWT y los datos del usuario
+            localStorage.setItem('token', data.access_token);
+            localStorage.setItem('user', JSON.stringify(data.user));
+            router.push('/cards');
         } else {
             const errorData = await response.json().catch(() => null);
             setError(errorData?.detail || 'Email o contraseña incorrectos');
@@ -71,7 +72,7 @@ export default function Login() {
                         <form onSubmit={handleSubmit}>
                             <div className="mb-4">
                                 <label htmlFor="email" className="block mb-2 text-sm font-medium text-black">Email</label>
-                                <input type="email" onChange={(e) => setEmail(e.target.value)} id="email" name="email" className="shadow-sm border-gray-300 rounded-md w-full py-2 px-4 bg-gray-100" placeholder="ejemplo@caixabank.com" required />
+                                <input type="email" onChange={(e) => setEmail(e.target.value)} id="email" name="email" className="shadow-sm border-gray-300 rounded-md w-full py-2 px-4 bg-gray-100 text-black" placeholder="ejemplo@caixabank.com" required />
                             </div>
                             <div className="mb-2">
                                 <div className="flex items-center justify-between">
@@ -79,7 +80,7 @@ export default function Login() {
                                     <Link href="/recuperar" className="text-sm text-blue-600 hover:underline">¿Has olvidado tu contraseña?</Link>
                                 </div>
                             </div>
-                            <input type="password" onChange={(e) => setPassword(e.target.value)} id="password" name="password" className="shadow-sm border-gray-300 rounded-md w-full py-2 px-4 mb-8 bg-gray-100" placeholder="••••••••" required />
+                            <input type="password" onChange={(e) => setPassword(e.target.value)} id="password" name="password" className="shadow-sm border-gray-300 rounded-md w-full py-2 px-4 mb-8 bg-gray-100 text-black" placeholder="••••••••" required />
                             <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md w-full transition duration-300">Iniciar sesión</button>
                         </form>
                         <div className="mt-10 flex justify-center">
