@@ -31,6 +31,41 @@ class EmploymentStatus(str, Enum):
     RETIRED = "jubilado"
 
 
+class TransactionType(str, Enum):
+    INCOME = "ingreso"
+    EXPENSE = "gasto"
+
+
+class TransactionCategory(str, Enum):
+    # Gastos
+    SUPERMARKET = "supermercado"
+    RESTAURANT = "restaurante"
+    TRANSPORT = "transporte"
+    ENTERTAINMENT = "ocio"
+    HEALTH = "salud"
+    SHOPPING = "compras"
+    BILLS = "facturas"
+    EDUCATION = "educacion"
+    TRAVEL = "viajes"
+    OTHER_EXPENSE = "otros_gastos"
+    # Ingresos
+    SALARY = "nomina"
+    TRANSFER = "transferencia"
+    OTHER_INCOME = "otros_ingresos"
+
+
+class Transaction(BaseModel):
+    """
+    Modelo de transacción/movimiento bancario
+    """
+    date: datetime = Field(..., description="Fecha de la transacción")
+    concept: str = Field(..., min_length=1, max_length=200, description="Concepto de la transacción")
+    amount: float = Field(..., description="Cantidad (positiva para ingresos, negativa para gastos)")
+    transaction_type: TransactionType
+    category: TransactionCategory
+    merchant: Optional[str] = Field(None, description="Comercio o entidad")
+
+
 class User(BaseModel):
     """
     Modelo de usuario/cliente del banco
@@ -66,6 +101,12 @@ class User(BaseModel):
     has_debts: bool = Field(default=False)
     debt_amount: float = Field(default=0.0, ge=0)
     
+    # Authentication
+    password: str = Field(..., min_length=6, description="Contraseña del usuario")
+    
+    # Transactions
+    transactions: list[Transaction] = Field(default_factory=list, description="Historial de movimientos/transacciones")
+    
     # Metadata
     registration_date: datetime = Field(default_factory=datetime.now)
     active: bool = Field(default=True)
@@ -95,6 +136,17 @@ class User(BaseModel):
                 "credit_score": 720,
                 "has_debts": False,
                 "debt_amount": 0.0,
+                "password": "password123",
+                "transactions": [
+                    {
+                        "date": "2024-01-15T10:30:00",
+                        "concept": "Compra en Mercadona",
+                        "amount": -45.50,
+                        "transaction_type": "gasto",
+                        "category": "supermercado",
+                        "merchant": "Mercadona"
+                    }
+                ],
                 "registration_date": "2024-01-01T00:00:00",
                 "active": True
             }

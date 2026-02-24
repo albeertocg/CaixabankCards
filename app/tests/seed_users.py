@@ -13,7 +13,15 @@ from faker import Faker
 # Añadir el directorio raíz al path para imports
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
-from app.models.user import User, MaritalStatus, EducationLevel, EmploymentStatus
+from app.models.user import (
+    User,
+    MaritalStatus,
+    EducationLevel,
+    EmploymentStatus,
+    Transaction,
+    TransactionType,
+    TransactionCategory,
+)
 
 # Cargar variables de entorno
 load_dotenv()
@@ -34,6 +42,115 @@ def generate_dni():
 def generate_phone():
     """Genera un teléfono móvil español"""
     return f"+346{random.randint(10000000, 99999999)}"
+
+
+def generate_transactions(num_transactions: int = 50, max_days_back: int = 180) -> list[dict]:
+    """
+    Genera transacciones bancarias fake
+    
+    Args:
+        num_transactions: Número de transacciones a generar
+        max_days_back: Días hacia atrás para generar transacciones
+    
+    Returns:
+        Lista de transacciones
+    """
+    transactions = []
+    
+    # Comercios por categoría
+    merchants = {
+        TransactionCategory.SUPERMARKET: ["Mercadona", "Carrefour", "Lidl", "Dia", "Alcampo"],
+        TransactionCategory.RESTAURANT: ["McDonald's", "Burger King", "La Tagliatella", "VIPS", "Telepizza"],
+        TransactionCategory.TRANSPORT: ["Renfe", "Metro Madrid", "Cabify", "Uber", "Repsol"],
+        TransactionCategory.ENTERTAINMENT: ["Netflix", "Spotify", "Cinesa", "Fnac", "PlayStation Store"],
+        TransactionCategory.HEALTH: ["Farmacia", "Hospital", "Clínica Dental", "Óptica", "Gimnasio"],
+        TransactionCategory.SHOPPING: ["Zara", "H&M", "Amazon", "El Corte Inglés", "MediaMarkt"],
+        TransactionCategory.BILLS: ["Iberdrola", "Movistar", "Endesa", "Vodafone", "Orange"],
+        TransactionCategory.EDUCATION: ["Universidad", "Academia", "Librería", "Cursos Online"],
+        TransactionCategory.TRAVEL: ["Booking.com", "Ryanair", "Renfe", "Hotel", "Airbnb"],
+        TransactionCategory.OTHER_EXPENSE: ["Varios", "Otros"],
+    }
+    
+    # Conceptos para ingresos
+    income_concepts = {
+        TransactionCategory.SALARY: "Nómina mensual",
+        TransactionCategory.TRANSFER: "Transferencia recibida",
+        TransactionCategory.OTHER_INCOME: "Otros ingresos",
+    }
+    
+    for _ in range(num_transactions):
+        # Fecha aleatoria en los últimos max_days_back días
+        days_ago = random.randint(1, max_days_back)
+        fecha = datetime.now() - timedelta(days=days_ago, hours=random.randint(0, 23), minutes=random.randint(0, 59))
+        
+        # Determinar si es ingreso o gasto (80% gastos, 20% ingresos)
+        if random.random() < 0.2:
+            # Ingreso
+            transaction_type = TransactionType.INCOME
+            category = random.choice([
+                TransactionCategory.SALARY,
+                TransactionCategory.TRANSFER,
+                TransactionCategory.OTHER_INCOME
+            ])
+            
+            if category == TransactionCategory.SALARY:
+                amount = round(random.uniform(1200, 3500), 2)
+            else:
+                amount = round(random.uniform(50, 1000), 2)
+            
+            concept = income_concepts[category]
+            merchant = None
+        else:
+            # Gasto
+            transaction_type = TransactionType.EXPENSE
+            category = random.choice([
+                TransactionCategory.SUPERMARKET,
+                TransactionCategory.RESTAURANT,
+                TransactionCategory.TRANSPORT,
+                TransactionCategory.ENTERTAINMENT,
+                TransactionCategory.HEALTH,
+                TransactionCategory.SHOPPING,
+                TransactionCategory.BILLS,
+                TransactionCategory.EDUCATION,
+                TransactionCategory.TRAVEL,
+                TransactionCategory.OTHER_EXPENSE,
+            ])
+            
+            # Cantidad según categoría
+            amounts_by_category = {
+                TransactionCategory.SUPERMARKET: (20, 150),
+                TransactionCategory.RESTAURANT: (15, 80),
+                TransactionCategory.TRANSPORT: (5, 100),
+                TransactionCategory.ENTERTAINMENT: (5, 50),
+                TransactionCategory.HEALTH: (10, 200),
+                TransactionCategory.SHOPPING: (20, 300),
+                TransactionCategory.BILLS: (30, 150),
+                TransactionCategory.EDUCATION: (50, 500),
+                TransactionCategory.TRAVEL: (100, 1000),
+                TransactionCategory.OTHER_EXPENSE: (10, 100),
+            }
+            
+            min_amt, max_amt = amounts_by_category[category]
+            amount = -round(random.uniform(min_amt, max_amt), 2)  # Negativo para gastos
+            
+            merchant = random.choice(merchants.get(category, ["Comercio"]))
+            concept = f"Compra en {merchant}"
+        
+        transaction = Transaction(
+            date=fecha,
+            concept=concept,
+            amount=amount,
+            transaction_type=transaction_type,
+            category=category,
+            merchant=merchant
+        )
+        
+        transactions.append(transaction.model_dump())
+    
+    # Ordenar por fecha descendente (más reciente primero)
+    transactions.sort(key=lambda x: x['date'], reverse=True)
+    
+    return transactions
 
 
 def generate_user() -> dict:
@@ -137,6 +254,15 @@ def generate_user() -> dict:
     else:
         fecha_registro = datetime.now() - timedelta(days=random.randint(1, 30))
     
+    # Generar contraseña simple (para desarrollo/testing)
+    # En producción se debería hashear
+    dni_num = ''.join(filter(str.isdigit, generate_dni()))[:4]
+    password = f"Password{dni_num}"
+    
+    # Generar transacciones (entre 20 y 100 transacciones en los últimos 6 meses)
+    num_transacciones = random.randint(20, 100)
+    transactions = generate_transactions(num_transacciones, max_days_back=180)
+    
     user = User(
         national_id=generate_dni(),
         first_name=fake.first_name(),
@@ -159,6 +285,8 @@ def generate_user() -> dict:
         credit_score=score_crediticio,
         has_debts=tiene_deudas,
         debt_amount=round(importe_deudas, 2),
+        password=password,
+        transactions=transactions,
         registration_date=fecha_registro,
         active=True
     )
@@ -221,10 +349,12 @@ def seed_database(num_users: int = 100):
             print(f"\n   • {user['first_name']} {user['last_name']}")
             print(f"     DNI: {user['national_id']}")
             print(f"     Email: {user['email']}")
+            print(f"     Password: {user['password']}")
             print(f"     Edad: {(datetime.now() - user['birth_date']).days // 365} años")
             print(f"     Ingresos: {user['annual_income']:,.2f}€")
             print(f"     Score: {user['credit_score']}")
             print(f"     Productos: {', '.join(user['contracted_products'])}")
+            print(f"     Transacciones: {len(user['transactions'])} movimientos")
         
     except Exception as e:
         print(f"Error: {e}")
