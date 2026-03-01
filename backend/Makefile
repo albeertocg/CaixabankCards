@@ -32,4 +32,4 @@ dev:
 
 pre-commit-install:
 	pip install pre-commit
-	pre-commit install
+	cd .. && pre-commit install --config backend/.pre-commit-config.yaml

@@ -34,24 +34,22 @@ usuario_prueba = {
     "debt_amount": 0.0,
     "registration_date": "2024-02-01T10:00:00Z",
     "active": True,
-    "password": "123456789"
+    "password": "123456789",
 }
 
-login_prueba = {
-    "email": "carlos@example.com",
-    "password": "123456789"
-}
+login_prueba = {"email": "carlos@example.com", "password": "123456789"}
 
 
 # ─── Funciones de test ─────────────────────────────────────────
+
 
 def test_registro():
     """POST - Registrar un nuevo usuario"""
     print("\n🔹 TEST: Registrar usuario")
     print(f"   POST {BASE_URL}/api/auth/register")
-    
+
     response = httpx.post(f"{BASE_URL}/api/auth/register", json=usuario_prueba, timeout=30.0)
-    
+
     print(f"   Status: {response.status_code}")
     print(f"   Response: {response.json()}")
     return response
@@ -61,9 +59,9 @@ def test_login():
     """POST - Login de usuario"""
     print("\n🔹 TEST: Login")
     print(f"   POST {BASE_URL}/api/auth/login")
-    
+
     response = httpx.post(f"{BASE_URL}/api/auth/login", json=login_prueba, timeout=30.0)
-    
+
     print(f"   Status: {response.status_code}")
     print(f"   Response: {response.json()}")
     return response
