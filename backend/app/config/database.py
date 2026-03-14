@@ -1,9 +1,11 @@
-from motor.motor_asyncio import AsyncIOMotorClient
+from typing import Any
+
+from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 
 from app.config.settings import settings
 
-client = AsyncIOMotorClient(settings.mongo_uri)
-db = client[settings.mongo_db_name]
+client: AsyncIOMotorClient[dict[str, Any]] = AsyncIOMotorClient(settings.mongo_uri)
+db: AsyncIOMotorDatabase[dict[str, Any]] = client[settings.mongo_db_name]
 
 
 async def connect_db() -> None:
