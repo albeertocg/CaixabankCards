@@ -4,7 +4,7 @@ import bcrypt
 from jose import jwt
 
 from app.config.settings import settings
-from app.models.user import UserCreate, UserResponse
+from app.dtos.user import UserCreate, UserResponse
 from app.repositories.user_repository import UserRepository
 from app.schemas.auth import LoginResponse, LoginUserInfo
 

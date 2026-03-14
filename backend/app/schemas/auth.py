@@ -1,6 +1,6 @@
 from pydantic import BaseModel, EmailStr
 
-from app.models.user import UserResponse
+from app.dtos.user import UserResponse
 
 
 class LoginRequest(BaseModel):
