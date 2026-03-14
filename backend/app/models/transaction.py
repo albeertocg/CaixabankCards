@@ -2,7 +2,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field
 
-from app.models.enums import TransactionCategory, TransactionType
+from app.constants.transaction import TransactionCategory, TransactionType
 
 
 class Transaction(BaseModel):

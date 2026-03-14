@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
-from app.models.enums import EducationLevel, EmploymentStatus, MaritalStatus
+from app.constants.user import EducationLevel, EmploymentStatus, MaritalStatus
 from app.models.transaction import Transaction
 
 
@@ -48,18 +48,7 @@ class UserBase(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
 
-class UserCreate(UserBase):
-    password: str = Field(..., min_length=6, description="Contrasena del usuario")
-
-
 class UserInDB(UserBase):
     id: str | None = Field(None, alias="_id")
     hashed_password: str
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-
-
-class UserResponse(UserBase):
-    id: str
-    created_at: datetime | None = None
-
-    model_config = ConfigDict(populate_by_name=True, from_attributes=True)
