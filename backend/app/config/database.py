@@ -1,27 +1,20 @@
 from motor.motor_asyncio import AsyncIOMotorClient
-from dotenv import load_dotenv
-import os
 
-load_dotenv()
+from app.config.settings import settings
 
-MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
-MONGO_DB_NAME = os.getenv("MONGO_DB_NAME", "caixabank_cards")
-
-client = AsyncIOMotorClient(MONGO_URI)
-db = client[MONGO_DB_NAME]
+client = AsyncIOMotorClient(settings.mongo_uri)
+db = client[settings.mongo_db_name]
 
 
-async def connect_db():
-    """Verificar conexión a MongoDB al iniciar."""
+async def connect_db() -> None:
     try:
         await client.admin.command("ping")
-        print(f"✅ Conectado a MongoDB: {MONGO_DB_NAME}")
+        print(f"Conectado a MongoDB: {settings.mongo_db_name}")
     except Exception as e:
-        print(f"❌ Error conectando a MongoDB: {e}")
-        raise e
+        print(f"Error conectando a MongoDB: {e}")
+        raise
 
 
-async def close_db():
-    """Cerrar conexión a MongoDB."""
+async def close_db() -> None:
     client.close()
-    print("🔌 Conexión a MongoDB cerrada")
+    print("Conexion a MongoDB cerrada")

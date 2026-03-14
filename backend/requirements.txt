@@ -5,8 +5,8 @@ motor
 # Autenticación
 passlib[bcrypt]
 python-jose[cryptography]
-python-dotenv
 pydantic[email]
+pydantic-settings
 # Testing
 httpx
 # Linting and formatting

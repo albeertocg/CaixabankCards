@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config.database import connect_db, close_db
+from app.config.settings import settings
 from app.routes.auth_routes import router as auth_router
 
 
@@ -18,7 +19,7 @@ app = FastAPI(title="CaixabankCards API", lifespan=lifespan)
 # CORS - permitir peticiones del frontend (Next.js)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=settings.cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
