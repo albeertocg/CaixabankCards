@@ -22,7 +22,7 @@ usuario_prueba = {
     "postal_code": "28001",
     "province": "Madrid",
     "annual_income": 35000.00,
-    "employment_status": "empleado",
+    "employment_status": "empleado_cuenta_ajena",
     "education_level": "universidad",
     "marital_status": "soltero",
     "num_dependents": 0,
