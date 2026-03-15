@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta, timezone
-from typing import Any
 
 import bcrypt
 from jose import jwt
@@ -90,17 +89,41 @@ async def login(email: str, password: str) -> LoginResponse:
 # Private helpers
 # =========================
 def _hash_password(password: str) -> str:
-    pwd_bytes = password.encode("utf-8")[:72]
-    return bcrypt.hashpw(pwd_bytes, bcrypt.gensalt()).decode("utf-8")
+    """Hash a plain-text password using bcrypt.
+
+    Args:
+        password: Plain-text password (max 72 bytes due to bcrypt limitation).
+
+    Returns:
+        Bcrypt hashed password string.
+    """
+    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
 
 def _verify_password(plain_password: str, hashed_password: str) -> bool:
-    pwd_bytes = plain_password.encode("utf-8")[:72]
-    return bcrypt.checkpw(pwd_bytes, hashed_password.encode("utf-8"))
+    """Verify a plain-text password against a bcrypt hash.
+
+    Args:
+        plain_password: Plain-text password to verify.
+        hashed_password: Bcrypt hash to verify against.
+
+    Returns:
+        True if password matches hash, False otherwise.
+    """
+    return bcrypt.checkpw(plain_password.encode("utf-8"), hashed_password.encode("utf-8"))
 
 
 def _create_token(user_id: str, email: str) -> str:
-    payload: dict[str, Any] = {
+    """Create a JWT access token for authenticated user.
+
+    Args:
+        user_id: User's unique identifier.
+        email: User's email address.
+
+    Returns:
+        Encoded JWT token string.
+    """
+    payload = {
         "sub": user_id,
         "email": email,
         "exp": datetime.now(timezone.utc) + timedelta(minutes=settings.jwt_expiration_minutes),
