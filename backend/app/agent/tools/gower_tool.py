@@ -4,6 +4,7 @@ Finds credit cards closest to user preferences based on spending patterns
 and financial profile using Gower distance metric.
 """
 
+from dataclasses import asdict
 from typing import Any
 
 from app.agent.data.card_registry import CARD_REGISTRY
@@ -14,53 +15,71 @@ _EXCLUDE_KEYS = {"nombre"}
 
 
 def search_similar_cards(
-    categoria_principal: str,
-    ingreso_anual: float,
-    gasto_mensual: float,
-    cuota_maxima: float,
-    cashback_minimo: float,
+    categoria: str | None = None,
+    tier: str | None = None,
+    cuota_anual: float | None = None,
+    ingreso_minimo: float | None = None,
+    cashback_pct: float | None = None,
+    limite_credito: float | None = None,
+    tipo_tarjeta: str | None = None,
+    seguro_viaje: float | None = None,
+    seguro_equipaje: float | None = None,
+    salas_vip: int | None = None,
+    puntos_por_euro: float | None = None,
 ) -> list[dict[str, Any]]:
-    """Search for cards most similar to user profile using Gower distance.
+    """Search for cards most similar to an ideal card using Gower distance.
 
-    Returns the up to 3 cards closest to the ideal user profile.
+    Build the ideal card by setting only the features that matter for this
+    search.  Features left as None are excluded from the distance calculation,
+    so Gower only compares the dimensions the model considers relevant.
+
+    Returns the up to 3 cards closest to the ideal card profile.
 
     Args:
-        categoria_principal: Desired card category
+        categoria: Card category
             (viajes, compras_online, supermercado, restaurante_ocio, clasica).
-        ingreso_anual: User's annual income in euros.
-        gasto_mensual: User's average monthly spending in euros.
-        cuota_maxima: Maximum acceptable annual fee in euros.
-        cashback_minimo: Minimum desired cashback percentage.
+        tier: Desired card tier (basico, medio, premium).
+        cuota_anual: Maximum acceptable annual fee in euros.
+        ingreso_minimo: Minimum required income in euros.
+        cashback_pct: Desired cashback percentage.
+        limite_credito: Desired credit limit in euros.
+        tipo_tarjeta: Card type (debito, credito, debito_credito).
+        seguro_viaje: Desired travel insurance coverage in euros.
+        seguro_equipaje: Desired luggage insurance coverage in euros.
+        salas_vip: Desired number of VIP lounge accesses per year.
+        puntos_por_euro: Desired loyalty points earned per euro spent.
 
     Returns:
         List of up to 3 card dictionaries sorted by similarity score.
     """
-    # Pre-filtrar por categoría para reducir ruido en Gower
-    filtered = [card for card in CARD_REGISTRY if card["categoria"] == categoria_principal]
-    if not filtered:
+    # Pre-filtrar por categoría si se especifica
+    if categoria is not None:
+        filtered = [card for card in CARD_REGISTRY if card.categoria == categoria]
+        if not filtered:
+            filtered = CARD_REGISTRY
+    else:
         filtered = CARD_REGISTRY
 
     # Feature keys = todas las keys del registro excepto "nombre"
-    feature_keys = [feature_key for feature_key in filtered[0] if feature_key not in _EXCLUDE_KEYS]
+    feature_keys = sorted(filtered[0].feature_dict(exclude=_EXCLUDE_KEYS))
 
-    # Construir tarjeta ideal con TODOS los campos (para alineación con Gower)
-    ideal: dict[str, Any] = {
-        "categoria": categoria_principal,
-        "tier": "medio",
-        "cuota_anual": cuota_maxima,
-        "ingreso_minimo": ingreso_anual,
-        "cashback_pct": cashback_minimo,
-        "limite_credito": gasto_mensual * 3,
-        "tipo_tarjeta": "credito",
-        "seguro_viaje": 0,
-        "seguro_equipaje": 0,
-        "salas_vip": 0,
-        "puntos_por_euro": 0,
+    # Construir tarjeta ideal solo con los campos que el modelo proporcionó
+    provided: dict[str, Any] = {
+        "categoria": categoria,
+        "tier": tier,
+        "cuota_anual": cuota_anual,
+        "ingreso_minimo": ingreso_minimo,
+        "cashback_pct": cashback_pct,
+        "limite_credito": limite_credito,
+        "tipo_tarjeta": tipo_tarjeta,
+        "seguro_viaje": seguro_viaje,
+        "seguro_equipaje": seguro_equipaje,
+        "salas_vip": salas_vip,
+        "puntos_por_euro": puntos_por_euro,
     }
-    # Asegurar que tiene exactamente los mismos keys que las available
-    ideal = {feature_key: ideal.get(feature_key, 0) for feature_key in feature_keys}
+    ideal = {key: provided[key] for key in feature_keys if provided.get(key) is not None}
 
-    available = [{feature_key: card[feature_key] for feature_key in feature_keys} for card in filtered]
+    available = [card.feature_dict(exclude=_EXCLUDE_KEYS) for card in filtered]
 
     results = find_similar_cards(
         ideal_card=ideal,
@@ -70,11 +89,12 @@ def search_similar_cards(
     )
 
     # Re-adjuntar nombre y datos completos del registro original
-    output = []
+    output: list[dict[str, Any]] = []
     for result in results:
         for card in filtered:
-            if all(card.get(feature_key) == result.get(feature_key) for feature_key in feature_keys):
-                output.append(card)
+            card_features = card.feature_dict(exclude=_EXCLUDE_KEYS)
+            if all(card_features.get(key) == result.get(key) for key in feature_keys):
+                output.append(asdict(card))
                 break
 
     return output
