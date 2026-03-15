@@ -13,3 +13,7 @@ httpx
 ruff
 pre-commit
 gower-exp
+# Google ADK Agent
+google-adk
+# RAG - Vector Store
+chromadb

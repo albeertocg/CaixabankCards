@@ -53,6 +53,12 @@ htmlcov/
 # Ruff
 .ruff_cache/
 
+# Google ADK (sesiones locales)
+.adk/
+
+# ChromaDB (vectorstore generado)
+vectorstore_data/
+
 # OS
 .DS_Store
 Thumbs.db
