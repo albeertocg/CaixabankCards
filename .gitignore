@@ -19,7 +19,6 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-node_modules/
 
 # Virtual environments
 venv/
