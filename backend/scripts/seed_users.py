@@ -123,7 +123,7 @@ def generate_transactions(num_transactions: int = 50, max_days_back: int = 180) 
         )
         transactions.append(tx.model_dump(mode="json"))
 
-    transactions.sort(key=lambda x: x["date"], reverse=True)
+    transactions.sort(key=lambda transaction: transaction["date"], reverse=True)
     return transactions
 
 
@@ -257,10 +257,10 @@ def seed_database(num_users: int = 100) -> None:
         print(f"Conectado. Generando {num_users} usuarios...")
 
         users = []
-        for i in range(num_users):
+        for user_index in range(num_users):
             users.append(generate_user())
-            if (i + 1) % 10 == 0:
-                print(f"   Generados {i + 1}/{num_users}")
+            if (user_index + 1) % 10 == 0:
+                print(f"   Generados {user_index + 1}/{num_users}")
 
         print("Insertando en la base de datos...")
         result = users_collection.insert_many(users)
