@@ -16,6 +16,9 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     jwt_expiration_minutes: int = 60
 
+    # Google ADK
+    google_api_key: str = ""
+
     # CORS
     cors_origins: list[str] = ["http://localhost:3000"]
 
