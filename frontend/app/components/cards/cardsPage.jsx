@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import ChatWidget from '../chat/ChatWidget'
 
 /* ─── Iconos SVG inline ─── */
 const icons = {
@@ -729,6 +730,7 @@ export default function CardsPage() {
     const activeCat = CATEGORIAS.find((c) => c.id === activeCategory)
 
     return (
+        <>
         <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
             {/* Top bar */}
             <header className="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-sm">
@@ -825,5 +827,7 @@ export default function CardsPage() {
                 </div>
             </main>
         </div>
+        <ChatWidget userId={user?.id} />
+        </>
     )
 }
