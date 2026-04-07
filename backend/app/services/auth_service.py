@@ -39,7 +39,7 @@ async def register(user_data: UserCreate) -> UserResponse:
         raise DuplicateNationalIdError("El DNI/NIE ya esta registrado")
 
     user_dict = user_data.model_dump(mode="json")
-    password: str = user_dict.pop("password")
+    password = user_dict.pop("password")
     user_dict["hashed_password"] = _hash_password(password)
     user_dict["created_at"] = datetime.now(timezone.utc).isoformat()
 
@@ -48,7 +48,11 @@ async def register(user_data: UserCreate) -> UserResponse:
     return UserResponse(
         id=created_user["_id"],
         created_at=created_user.get("created_at"),
-        **{k: v for k, v in created_user.items() if k not in ("_id", "hashed_password", "created_at")},
+        **{
+            k: v
+            for k, v in created_user.items()
+            if k not in ("_id", "hashed_password", "created_at")
+        },
     )
 
 
@@ -110,7 +114,9 @@ def _verify_password(plain_password: str, hashed_password: str) -> bool:
     Returns:
         True if password matches hash, False otherwise.
     """
-    return bcrypt.checkpw(plain_password.encode("utf-8"), hashed_password.encode("utf-8"))
+    return bcrypt.checkpw(
+        plain_password.encode("utf-8"), hashed_password.encode("utf-8")
+    )
 
 
 def _create_token(user_id: str, email: str) -> str:
@@ -126,6 +132,9 @@ def _create_token(user_id: str, email: str) -> str:
     payload = {
         "sub": user_id,
         "email": email,
-        "exp": datetime.now(timezone.utc) + timedelta(minutes=settings.jwt_expiration_minutes),
+        "exp": datetime.now(timezone.utc)
+        + timedelta(minutes=settings.jwt_expiration_minutes),
     }
-    return jwt.encode(payload, settings.jwt_secret_key, algorithm=settings.jwt_algorithm)
+    return jwt.encode(
+        payload, settings.jwt_secret_key, algorithm=settings.jwt_algorithm
+    )
