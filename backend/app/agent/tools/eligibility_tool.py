@@ -48,12 +48,17 @@ def check_card_eligibility(
     reasons: list[str] = []
     if ingreso_anual < reqs.ingreso_minimo:
         reasons.append(
-            f"Ingreso anual ({ingreso_anual:,.0f}€) inferior al mínimo " f"requerido ({reqs.ingreso_minimo:,.0f}€)."
+            f"Ingreso anual ({ingreso_anual:,.0f}€) inferior al mínimo "
+            f"requerido ({reqs.ingreso_minimo:,.0f}€)."
         )
     if edad < reqs.edad_minima:
-        reasons.append(f"Edad ({edad}) inferior a la mínima requerida ({reqs.edad_minima}).")
+        reasons.append(
+            f"Edad ({edad}) inferior a la mínima requerida ({reqs.edad_minima})."
+        )
     if edad > reqs.edad_maxima:
-        reasons.append(f"Edad ({edad}) supera la máxima permitida ({reqs.edad_maxima}).")
+        reasons.append(
+            f"Edad ({edad}) supera la máxima permitida ({reqs.edad_maxima})."
+        )
 
     alternatives: list[str] = []
     if reasons:
@@ -66,7 +71,9 @@ def check_card_eligibility(
     )
 
 
-def _find_lower_tier_alternatives(card_name: str, ingreso_anual: float, edad: int) -> list[str]:
+def _find_lower_tier_alternatives(
+    card_name: str, ingreso_anual: float, edad: int
+) -> list[str]:
     """Find lower-tier cards in the same category that user qualifies for.
 
     Args:
@@ -88,14 +95,19 @@ def _find_lower_tier_alternatives(card_name: str, ingreso_anual: float, edad: in
         return []
 
     tier_list = CARD_TIERS_BY_CATEGORY.get(category, [])
-    card_index = tier_list.index(card_name) if card_name in tier_list else -1
+    if card_name not in tier_list:
+        return []
+    card_index = tier_list.index(card_name)
 
     alternatives = []
     for name in tier_list[:card_index]:
         reqs = CARD_REQUIREMENTS.get(name)
         if reqs is None:
             continue
-        if ingreso_anual >= reqs.ingreso_minimo and reqs.edad_minima <= edad <= reqs.edad_maxima:
+        if (
+            ingreso_anual >= reqs.ingreso_minimo
+            and reqs.edad_minima <= edad <= reqs.edad_maxima
+        ):
             alternatives.append(name)
 
     return alternatives
