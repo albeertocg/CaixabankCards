@@ -17,7 +17,7 @@ test: agregar/actualizar tests
 ```
 
 **Reglas:**
-- Mensaje en presente imperativo
+- Mensaje en español y en presente imperativo
 - Primera línea máximo 50 caracteres
 - Si es necesario, agregar descripción detallada después de línea en blanco
 
