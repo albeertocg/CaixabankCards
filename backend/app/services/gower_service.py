@@ -40,9 +40,15 @@ def find_similar_cards(
         InvalidMaxResultsError: If max_results is not a positive integer.
     """
     if not (0.0 <= threshold <= 1.0):
-        raise InvalidThresholdError(f"Threshold must be between 0 and 1. Got {threshold}.")
+        raise InvalidThresholdError(
+            f"Threshold must be between 0 and 1. Got {threshold}."
+        )
     if max_results <= 0:
-        raise InvalidMaxResultsError(f"max_results must be a positive integer. Got {max_results}.")
+        raise InvalidMaxResultsError(
+            f"max_results must be a positive integer. Got {max_results}."
+        )
+    if not available_cards:
+        return []
 
     ideal_card_dataframe, available_cards_dataframe = _build_aligned_dataframes(
         ideal_card=ideal_card,
@@ -57,7 +63,9 @@ def find_similar_cards(
     )
 
     filtered = [
-        (card_index, similarity) for card_index, similarity in indices_and_similarities if similarity >= threshold
+        (card_index, similarity)
+        for card_index, similarity in indices_and_similarities
+        if similarity >= threshold
     ]
     filtered.sort(key=lambda pair: pair[1], reverse=True)
 
@@ -74,18 +82,30 @@ def _build_aligned_dataframes(
     available_cards_dataframe = pd.DataFrame(list(available_cards))
     ideal_card_dataframe = pd.DataFrame([ideal_card])
 
-    all_columns = sorted(set(available_cards_dataframe.columns).union(ideal_card_dataframe.columns))
+    all_columns = sorted(
+        set(available_cards_dataframe.columns).union(ideal_card_dataframe.columns)
+    )
     available_cards_dataframe = available_cards_dataframe.reindex(columns=all_columns)
     ideal_card_dataframe = ideal_card_dataframe.reindex(columns=all_columns)
 
     numeric_columns = available_cards_dataframe.select_dtypes(include="number").columns
-    categorical_columns = [col for col in all_columns if col not in set(numeric_columns)]
+    categorical_columns = [
+        col for col in all_columns if col not in set(numeric_columns)
+    ]
 
-    available_cards_dataframe[numeric_columns] = available_cards_dataframe[numeric_columns].fillna(0.0)
-    ideal_card_dataframe[numeric_columns] = ideal_card_dataframe[numeric_columns].fillna(0.0)
+    available_cards_dataframe[numeric_columns] = available_cards_dataframe[
+        numeric_columns
+    ].fillna(0.0)
+    ideal_card_dataframe[numeric_columns] = ideal_card_dataframe[
+        numeric_columns
+    ].fillna(0.0)
 
-    available_cards_dataframe[categorical_columns] = available_cards_dataframe[categorical_columns].fillna("MISSING")
-    ideal_card_dataframe[categorical_columns] = ideal_card_dataframe[categorical_columns].fillna("MISSING")
+    available_cards_dataframe[categorical_columns] = available_cards_dataframe[
+        categorical_columns
+    ].fillna("MISSING")
+    ideal_card_dataframe[categorical_columns] = ideal_card_dataframe[
+        categorical_columns
+    ].fillna("MISSING")
 
     return ideal_card_dataframe, available_cards_dataframe
 
@@ -95,12 +115,15 @@ def _topn_indices_and_similarities(
     available_cards_dataframe: pd.DataFrame,
     top_n: int,
 ) -> list[tuple[int, float]]:
-    topn_result = gower.gower_topn(ideal_card_dataframe, available_cards_dataframe, n=top_n)
+    topn_result = gower.gower_topn(
+        ideal_card_dataframe, available_cards_dataframe, n=top_n
+    )
 
     nearest_indices = list(topn_result["index"])
     nearest_distances = list(topn_result["values"])
 
     nearest_similarities = [1.0 - float(distance) for distance in nearest_distances]
     return [
-        (int(card_index), float(similarity)) for card_index, similarity in zip(nearest_indices, nearest_similarities)
+        (int(card_index), float(similarity))
+        for card_index, similarity in zip(nearest_indices, nearest_similarities)
     ]
