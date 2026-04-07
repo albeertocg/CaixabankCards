@@ -12,7 +12,13 @@ from app.agent.rag.indexer import ensure_indexed
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await connect_db()
-    ensure_indexed()
+    print("GOOGLE_API_KEY repr:", repr(settings.google_api_key))
+    print("GOOGLE_API_KEY len:", len(settings.google_api_key))
+    
+    if settings.google_api_key and settings.google_api_key.strip():
+        ensure_indexed()
+    else:
+        print("GOOGLE_API_KEY no configurada. Se omite el indexado.")
     yield
     await close_db()
 
