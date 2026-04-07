@@ -1,8 +1,12 @@
 from typing import Any
 
+import logging
+
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 
 from app.config.settings import settings
+
+logger = logging.getLogger(__name__)
 
 client: AsyncIOMotorClient[dict[str, Any]] = AsyncIOMotorClient(settings.mongo_uri)
 db: AsyncIOMotorDatabase[dict[str, Any]] = client[settings.mongo_db_name]
@@ -18,13 +22,13 @@ async def connect_db() -> None:
     """
     try:
         await client.admin.command("ping")
-        print(f"Conectado a MongoDB: {settings.mongo_db_name}")
+        logger.info("Conectado a MongoDB: %s", settings.mongo_db_name)
     except Exception as e:
-        print(f"Error conectando a MongoDB: {e}")
+        logger.error("Error conectando a MongoDB: %s", e)
         raise
 
 
 async def close_db() -> None:
     """Close MongoDB connection during application shutdown."""
     client.close()
-    print("Conexion a MongoDB cerrada")
+    logger.info("Conexion a MongoDB cerrada")
