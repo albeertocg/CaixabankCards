@@ -77,7 +77,9 @@ def search_similar_cards(
         "salas_vip": salas_vip,
         "puntos_por_euro": puntos_por_euro,
     }
-    ideal = {key: provided[key] for key in feature_keys if provided.get(key) is not None}
+    ideal = {
+        key: provided[key] for key in feature_keys if provided.get(key) is not None
+    }
 
     available = [card.feature_dict(exclude=_EXCLUDE_KEYS) for card in filtered]
 
@@ -88,13 +90,22 @@ def search_similar_cards(
         max_results=3,
     )
 
-    # Re-adjuntar nombre y datos completos del registro original
     output: list[dict[str, Any]] = []
     for result in results:
         for card in filtered:
             card_features = card.feature_dict(exclude=_EXCLUDE_KEYS)
-            if all(card_features.get(key) == result.get(key) for key in feature_keys):
+            if all(
+                _values_match(card_features.get(key), result.get(key))
+                for key in feature_keys
+            ):
                 output.append(asdict(card))
                 break
 
     return output
+
+
+def _values_match(a: object, b: object) -> bool:
+    """Compare two values with tolerance for floats."""
+    if isinstance(a, float) and isinstance(b, float):
+        return abs(a - b) < 1e-9
+    return a == b
