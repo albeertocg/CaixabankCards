@@ -71,14 +71,7 @@ async def send_message(request: ChatMessageRequest) -> ChatMessageResponse:
 
 @router.websocket("/ws/{user_id}")
 async def websocket_chat(websocket: WebSocket, user_id: str) -> None:
-    """WebSocket endpoint for real-time chat.
-
-    Maintains a persistent connection for bidirectional messaging with the agent.
-
-    Args:
-        websocket: The WebSocket connection.
-        user_id: The unique identifier of the user.
-    """
+    """WebSocket endpoint for real-time chat."""
     await websocket.accept()
 
     try:
@@ -88,18 +81,23 @@ async def websocket_chat(websocket: WebSocket, user_id: str) -> None:
                 type="greeting", session_id=session_id, response=greeting
             ).model_dump()
         )
-
-        while True:
-            message = await websocket.receive_text()
-            response = await chat_service.send_message(
-                session_id=session_id,
-                user_id=user_id,
-                message=message,
-            )
-            await websocket.send_json(
-                WebSocketMessage(
-                    type="message", session_id=session_id, response=response
-                ).model_dump()
-            )
+        await _websocket_message_loop(websocket, session_id, user_id)
     except WebSocketDisconnect:
         pass
+
+
+async def _websocket_message_loop(
+    websocket: WebSocket, session_id: str, user_id: str
+) -> None:
+    while True:
+        message = await websocket.receive_text()
+        response = await chat_service.send_message(
+            session_id=session_id,
+            user_id=user_id,
+            message=message,
+        )
+        await websocket.send_json(
+            WebSocketMessage(
+                type="message", session_id=session_id, response=response
+            ).model_dump()
+        )
