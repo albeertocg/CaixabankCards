@@ -1,9 +1,12 @@
 from dataclasses import dataclass
+import logging
 from pathlib import Path
 
 from app.agent.rag.embeddings import embed_query
 from app.agent.rag.vectorstore import query_semantic
 from app.config.settings import settings
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -60,13 +63,12 @@ class GuardrailService:
 
         best_distance = results[0]["distance"]
 
-        print(
-            f"[GUARDRAIL] message={text!r} "
-            f"best_distance={best_distance:.4f} "
-            f"threshold={self.threshold}"
+        logger.debug(
+            "message=%s best_distance=%.4f threshold=%s",
+            text,
+            best_distance,
+            self.threshold,
         )
-        print(f"[GUARDRAIL] validando: {text!r}")
-        print(f"[GUARDRAIL] best_distance={best_distance}")
         if best_distance > self.threshold:
             return GuardrailResult(
                 allowed=False,
