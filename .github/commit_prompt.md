@@ -21,6 +21,7 @@ Descripción detallada si es necesario (máximo 72 caracteres por línea)
 - `chore`: Cambios de configuración, dependencias, etc.
 
 ### Reglas
+- Mensajes siempre en español
 - Primera línea: máximo 50 caracteres
 - Mensaje en presente imperativo
 - Descripción detallada después de línea en blanco (si es necesario)
