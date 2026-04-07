@@ -26,4 +26,5 @@ async def connect_db() -> None:
 
 async def close_db() -> None:
     """Close MongoDB connection during application shutdown."""
+    client.close()
     print("Conexion a MongoDB cerrada")
