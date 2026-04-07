@@ -1,4 +1,6 @@
+from asyncio import get_running_loop
 from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -12,13 +14,10 @@ from app.agent.rag.indexer import ensure_indexed
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await connect_db()
-    print("GOOGLE_API_KEY repr:", repr(settings.google_api_key))
-    print("GOOGLE_API_KEY len:", len(settings.google_api_key))
-    
+
     if settings.google_api_key and settings.google_api_key.strip():
-        ensure_indexed()
-    else:
-        print("GOOGLE_API_KEY no configurada. Se omite el indexado.")
+        loop = get_running_loop()
+        await loop.run_in_executor(None, ensure_indexed)
     yield
     await close_db()
 
