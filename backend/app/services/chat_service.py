@@ -1,14 +1,18 @@
 """Chat service orchestrating session creation with context and message handling."""
 
 from google.genai import types
-
+from app.config.settings import settings
 from app.agent.agent import runner, session_service
 from app.agent.context import build_user_context
-
+from app.services.guardrail_service import GuardrailService
 
 class ChatService:
     """Service for managing chat sessions and message exchanges with the card recommendation agent."""
-
+    
+    def __init__(self) -> None:
+            self.guardrail_service = GuardrailService()
+            
+            
     async def create_session(self, user_id: str) -> str:
         """Create a chat session and inject user context.
 
@@ -93,6 +97,13 @@ class ChatService:
         Returns:
             The agent's response text.
         """
+        print(f"[CHAT] mensaje usuario: {message!r}")
+        guardrail_result = self.guardrail_service.validate(message)
+        print(f"[CHAT] guardrail allowed={guardrail_result.allowed} response={guardrail_result.response!r}")
+
+        if not guardrail_result.allowed:
+            return guardrail_result.response
+
         content = types.Content(
             role="user",
             parts=[types.Part.from_text(text=message)],
