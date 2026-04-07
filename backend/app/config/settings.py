@@ -6,20 +6,18 @@ class Settings(BaseSettings):
         env_file=".env",
         env_file_encoding="utf-8",
     )
-    
+
     # Google ADK
     google_api_key: str = ""
-    
+
     # MongoDB
     mongo_uri: str = "mongodb://localhost:27017"
     mongo_db_name: str = "caixabank_cards"
 
     # JWT
-    jwt_secret_key: str = "clave_secreta_por_defecto"
+    jwt_secret_key: str
     jwt_algorithm: str = "HS256"
     jwt_expiration_minutes: int = 60
-
-   
 
     # CORS
     cors_origins: list[str] = ["http://localhost:3000"]
