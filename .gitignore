@@ -71,6 +71,9 @@ logs/
 *.sqlite
 *.sqlite3
 
+# Node
+node_modules/
+
 # Dependencies lock (optional, uncomment if needed)
 # poetry.lock
 # Pipfile.lock
