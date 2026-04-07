@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import APIRouter, HTTPException, WebSocket, WebSocketDisconnect
 
 from app.schemas.chat import (
@@ -11,6 +13,7 @@ from app.services.chat_service import ChatService
 
 router = APIRouter(prefix="/api/chat", tags=["Chat"])
 chat_service = ChatService()
+logger = logging.getLogger(__name__)
 
 
 @router.post("/session", response_model=ChatSessionResponse)
@@ -29,8 +32,9 @@ async def create_session(user_id: str) -> ChatSessionResponse:
     try:
         session_id, greeting = await chat_service.create_session_with_greeting(user_id)
         return ChatSessionResponse(session_id=session_id, greeting=greeting)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    except Exception:
+        logger.exception("Error al crear sesion de chat")
+        raise HTTPException(status_code=500, detail="Error interno del servidor")
 
 
 @router.post("/message", response_model=ChatMessageResponse)
@@ -60,8 +64,9 @@ async def send_message(request: ChatMessageRequest) -> ChatMessageResponse:
             message=request.message,
         )
         return ChatMessageResponse(session_id=session_id, response=response)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    except Exception:
+        logger.exception("Error al procesar mensaje de chat")
+        raise HTTPException(status_code=500, detail="Error interno del servidor")
 
 
 @router.websocket("/ws/{user_id}")
@@ -79,7 +84,9 @@ async def websocket_chat(websocket: WebSocket, user_id: str) -> None:
     try:
         session_id, greeting = await chat_service.create_session_with_greeting(user_id)
         await websocket.send_json(
-            WebSocketGreeting(type="greeting", session_id=session_id, response=greeting).model_dump()
+            WebSocketGreeting(
+                type="greeting", session_id=session_id, response=greeting
+            ).model_dump()
         )
 
         while True:
@@ -90,7 +97,9 @@ async def websocket_chat(websocket: WebSocket, user_id: str) -> None:
                 message=message,
             )
             await websocket.send_json(
-                WebSocketMessage(type="message", session_id=session_id, response=response).model_dump()
+                WebSocketMessage(
+                    type="message", session_id=session_id, response=response
+                ).model_dump()
             )
     except WebSocketDisconnect:
         pass
