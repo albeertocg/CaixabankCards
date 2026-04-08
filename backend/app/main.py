@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config.database import connect_db, close_db
 from app.config.settings import settings
 from app.routes.auth_routes import router as auth_router
+from app.routes.card_routes import router as card_router
 from app.routes.chat_routes import router as chat_router
 from app.agent.rag.indexer import ensure_indexed
 
@@ -35,4 +36,5 @@ app.add_middleware(
 
 # Rutas
 app.include_router(auth_router)
+app.include_router(card_router)
 app.include_router(chat_router)
