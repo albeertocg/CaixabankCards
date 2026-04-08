@@ -254,11 +254,33 @@ async def _mock_find_by_id(self, user_id: str) -> dict | None:
     return _active_user
 
 
+async def _noop_save(*args, **kwargs):
+    return None
+
+
+async def _noop_find(*args, **kwargs):
+    return None
+
+
+async def _noop_deactivate(*args, **kwargs):
+    return None
+
+
+async def _noop_get_messages(*args, **kwargs):
+    return []
+
+
 @pytest.fixture(autouse=True)
-def _patch_user_repo(monkeypatch):
+def _patch_repos(monkeypatch):
     from app.repositories.user_repository import UserRepository
+    from app.repositories.chat_repository import ChatRepository
 
     monkeypatch.setattr(UserRepository, "find_by_id", _mock_find_by_id)
+    monkeypatch.setattr(ChatRepository, "find_active_session", _noop_find)
+    monkeypatch.setattr(ChatRepository, "create_session", _noop_save)
+    monkeypatch.setattr(ChatRepository, "deactivate_sessions", _noop_deactivate)
+    monkeypatch.setattr(ChatRepository, "save_message", _noop_save)
+    monkeypatch.setattr(ChatRepository, "get_messages", _noop_get_messages)
 
 
 @pytest_asyncio.fixture
