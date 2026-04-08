@@ -45,9 +45,9 @@ class TestToneAndFormat:
                 {
                     "name": "tono_profesional",
                     "instruction": (
-                        "El tono es profesional y cercano. Trato de usted o trato "
-                        "cercano formal. Sin emojis, sin jerga coloquial excesiva, "
-                        "sin lenguaje demasiado técnico."
+                        "El tono es profesional y cercano. Puede tutear o usar "
+                        "usted, ambos son aceptables. Sin emojis, sin jerga "
+                        "coloquial excesiva, sin lenguaje demasiado técnico."
                     ),
                 },
             ],
