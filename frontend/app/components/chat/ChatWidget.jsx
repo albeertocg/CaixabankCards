@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
+import ReactMarkdown from "react-markdown"
 
 const WS_BASE = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8000/api/chat/ws"
 
@@ -153,13 +154,27 @@ export default function ChatWidget({ userId }) {
                                 className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                             >
                                 <div
-                                    className={`max-w-[82%] px-3 py-2 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
+                                    className={`max-w-[82%] px-3 py-2 rounded-2xl text-sm leading-relaxed ${
                                         msg.role === "user"
-                                            ? "bg-blue-600 text-white rounded-br-sm"
-                                            : "bg-white text-gray-800 border border-gray-200 rounded-bl-sm shadow-sm"
+                                            ? "bg-blue-600 text-white rounded-br-sm whitespace-pre-wrap"
+                                            : "bg-white text-gray-800 border border-gray-200 rounded-bl-sm shadow-sm chat-markdown"
                                     }`}
                                 >
-                                    {msg.text}
+                                    {msg.role === "user" ? msg.text : (
+                                        <ReactMarkdown
+                                            components={{
+                                                p: ({ children }) => <p className="mb-1.5 last:mb-0">{children}</p>,
+                                                ul: ({ children }) => <ul className="list-disc pl-4 mb-1.5">{children}</ul>,
+                                                ol: ({ children }) => <ol className="list-decimal pl-4 mb-1.5">{children}</ol>,
+                                                li: ({ children }) => <li className="mb-0.5">{children}</li>,
+                                                strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
+                                                h3: ({ children }) => <p className="font-semibold mb-1">{children}</p>,
+                                                h4: ({ children }) => <p className="font-semibold mb-1">{children}</p>,
+                                            }}
+                                        >
+                                            {msg.text}
+                                        </ReactMarkdown>
+                                    )}
                                 </div>
                             </div>
                         ))}
