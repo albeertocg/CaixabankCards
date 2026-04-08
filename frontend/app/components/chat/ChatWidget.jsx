@@ -1,35 +1,49 @@
 "use client"
 
-import { useState, useEffect, useRef, useCallback } from "react"
+import { useState, useEffect, useRef } from "react"
 
-const WS_BASE = "ws://localhost:8000/api/chat/ws"
+const WS_BASE = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8000/api/chat/ws"
 
 export default function ChatWidget({ userId }) {
     const [open, setOpen] = useState(false)
     const [messages, setMessages] = useState([])
     const [input, setInput] = useState("")
-    const [status, setStatus] = useState("idle") // idle | connecting | connected | error
-
+    const [status, setStatus] = useState("idle")
     const [waiting, setWaiting] = useState(false)
 
     const wsRef = useRef(null)
     const bottomRef = useRef(null)
     const inputRef = useRef(null)
+    const sessionIdRef = useRef(null)
 
-    // Connect as soon as userId is available
     useEffect(() => {
         if (!userId || wsRef.current) return
 
+        const storedSid = sessionStorage.getItem(`chat_session_${userId}`)
+        const wsUrl = storedSid
+            ? `${WS_BASE}/${userId}?session_id=${storedSid}`
+            : `${WS_BASE}/${userId}`
+
         setStatus("connecting")
-        const ws = new WebSocket(`${WS_BASE}/${userId}`)
+        const ws = new WebSocket(wsUrl)
         wsRef.current = ws
 
         ws.onopen = () => setStatus("connected")
 
         ws.onmessage = (event) => {
             const data = JSON.parse(event.data)
-            setMessages((prev) => [...prev, { role: "assistant", text: data.response }])
-            setWaiting(false)
+
+            if (data.type === "greeting") {
+                sessionIdRef.current = data.session_id
+                sessionStorage.setItem(`chat_session_${userId}`, data.session_id)
+                setMessages((prev) => [...prev, { role: "assistant", text: data.response }])
+                setWaiting(false)
+            } else if (data.type === "history") {
+                setMessages((prev) => [...prev, { role: data.role, text: data.text }])
+            } else {
+                setMessages((prev) => [...prev, { role: "assistant", text: data.response }])
+                setWaiting(false)
+            }
         }
 
         ws.onclose = () => {
@@ -45,12 +59,10 @@ export default function ChatWidget({ userId }) {
         }
     }, [userId])
 
-    // Focus input when panel opens
     useEffect(() => {
         if (open) inputRef.current?.focus()
     }, [open])
 
-    // Scroll to bottom on new messages
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: "smooth" })
     }, [messages, waiting])
@@ -83,7 +95,6 @@ export default function ChatWidget({ userId }) {
 
     return (
         <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
-            {/* Chat panel */}
             {open && (
                 <div className="flex flex-col w-[90vw] max-w-[800px] h-[85vh] max-h-[800px] bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden">
                     {/* Header */}
@@ -204,7 +215,6 @@ export default function ChatWidget({ userId }) {
                 className="relative flex items-center justify-center w-14 h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg transition-all duration-200 hover:scale-105 active:scale-95"
                 aria-label={open ? "Cerrar chat" : "Abrir chat"}
             >
-                {/* Connection dot on the toggle button */}
                 {!open && status === "connected" && (
                     <span className="absolute top-0.5 right-0.5 w-3 h-3 bg-emerald-400 border-2 border-white rounded-full" />
                 )}
