@@ -1,6 +1,6 @@
 import logging
 
-from fastapi import APIRouter, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, HTTPException, Query, WebSocket, WebSocketDisconnect
 
 from app.schemas.chat import (
     ChatMessageRequest,
@@ -18,17 +18,6 @@ logger = logging.getLogger(__name__)
 
 @router.post("/session", response_model=ChatSessionResponse)
 async def create_session(user_id: str) -> ChatSessionResponse:
-    """Create a new chat session with injected user context.
-
-    Args:
-        user_id: The unique identifier of the user.
-
-    Returns:
-        ChatSessionResponse with session_id and greeting message.
-
-    Raises:
-        HTTPException: If session creation fails.
-    """
     try:
         session_id, greeting = await chat_service.create_session_with_greeting(user_id)
         return ChatSessionResponse(session_id=session_id, greeting=greeting)
@@ -39,19 +28,6 @@ async def create_session(user_id: str) -> ChatSessionResponse:
 
 @router.post("/message", response_model=ChatMessageResponse)
 async def send_message(request: ChatMessageRequest) -> ChatMessageResponse:
-    """Send a message to the agent.
-
-    Automatically creates a session if it doesn't exist.
-
-    Args:
-        request: ChatMessageRequest with user_id, message, and optional session_id.
-
-    Returns:
-        ChatMessageResponse with session_id and agent response.
-
-    Raises:
-        HTTPException: If message processing fails.
-    """
     try:
         if request.session_id is None:
             session_id = await chat_service.create_session(request.user_id)
@@ -69,25 +45,55 @@ async def send_message(request: ChatMessageRequest) -> ChatMessageResponse:
         raise HTTPException(status_code=500, detail="Error interno del servidor")
 
 
+@router.get("/history/{session_id}")
+async def get_history(session_id: str):
+    try:
+        messages = await chat_service.get_history(session_id)
+        return {"session_id": session_id, "messages": messages}
+    except Exception:
+        logger.exception("Error al obtener historial de chat")
+        raise HTTPException(status_code=500, detail="Error interno del servidor")
+
+
 @router.websocket("/ws/{user_id}")
-async def websocket_chat(websocket: WebSocket, user_id: str) -> None:
-    """WebSocket endpoint for real-time chat."""
+async def websocket_chat(
+    websocket: WebSocket,
+    user_id: str,
+    session_id: str = Query(default=None),
+) -> None:
     await websocket.accept()
 
     try:
-        session_id, greeting = await chat_service.create_session_with_greeting(user_id)
+        sid, greeting = await chat_service.create_session_with_greeting(user_id)
+        history = await chat_service.get_history(sid) if session_id else []
+
         await websocket.send_json(
             WebSocketGreeting(
-                type="greeting", session_id=session_id, response=greeting
+                type="greeting",
+                session_id=sid,
+                response=greeting,
             ).model_dump()
         )
-        await _websocket_message_loop(websocket, session_id, user_id)
+
+        if history:
+            for msg in history:
+                await websocket.send_json(
+                    {
+                        "type": "history",
+                        "role": msg["role"],
+                        "text": msg["text"],
+                    }
+                )
+
+        await _websocket_message_loop(websocket, sid, user_id)
     except WebSocketDisconnect:
         pass
 
 
 async def _websocket_message_loop(
-    websocket: WebSocket, session_id: str, user_id: str
+    websocket: WebSocket,
+    session_id: str,
+    user_id: str,
 ) -> None:
     while True:
         message = await websocket.receive_text()
@@ -98,6 +104,8 @@ async def _websocket_message_loop(
         )
         await websocket.send_json(
             WebSocketMessage(
-                type="message", session_id=session_id, response=response
+                type="message",
+                session_id=session_id,
+                response=response,
             ).model_dump()
         )
