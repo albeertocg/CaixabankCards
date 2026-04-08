@@ -43,549 +43,56 @@ const icons = {
     ),
 }
 
-/* ─── Datos de todas las tarjetas ─── */
-const CATEGORIAS = [
-    {
-        id: "viajes",
-        nombre: "Viajes",
+/* ─── Estilos por categoría (solo presentación, no datos de negocio) ─── */
+const CATEGORY_STYLES = {
+    viajes: {
         icon: "viajes",
         color: "from-sky-600 to-blue-700",
         light: "bg-sky-50",
         accent: "text-sky-700",
         border: "border-sky-200",
         badge: "bg-sky-100 text-sky-800",
-        tarjetas: [
-            {
-                nombre: "Travel Classic",
-                tier: "Classic",
-                cuota: "0€",
-                cuotaNote: "Sin coste",
-                cashback: "0,5%",
-                cashbackDesc: "en compras en el extranjero",
-                limite: "3.000€",
-                seguroViaje: "30.000€",
-                ingresos: "No requerido",
-                perfil: "Viajeros ocasionales (1-3 viajes/año)",
-                destacado: false,
-                beneficios: [
-                    "Cambio de divisa preferencial sin comisión",
-                    "Seguro de cancelación hasta 500€",
-                    "Asistencia telefónica 24/7 en español",
-                    "Compatible con Apple Pay y Google Pay",
-                    "Emisión y reposición gratuitas",
-                ],
-                extras: [
-                    { label: "Salas VIP", value: "No" },
-                    { label: "Retirada extranjero", value: "3% (mín. 3€)" },
-                    { label: "Seguro equipaje", value: "No" },
-                ],
-            },
-            {
-                nombre: "Travel Gold",
-                tier: "Gold",
-                cuota: "50€/año",
-                cuotaNote: "Bonificable con 12.000€ en compras",
-                cashback: "1,5%",
-                cashbackDesc: "en compras en el extranjero",
-                limite: "12.000€",
-                seguroViaje: "100.000€",
-                ingresos: "24.000€/año",
-                perfil: "Viajeros frecuentes (5-10 viajes/año)",
-                destacado: true,
-                beneficios: [
-                    "4 accesos/año a salas VIP (Priority Pass)",
-                    "Seguro de equipaje hasta 2.000€",
-                    "Seguro de cancelación hasta 3.000€",
-                    "Compensación por retraso de vuelo (+4h)",
-                    "Concierge: reservas hoteles, restaurantes",
-                    "Programa de puntos: 2 pts/€ en viajes",
-                ],
-                extras: [
-                    { label: "Salas VIP", value: "4 accesos/año" },
-                    { label: "Retirada extranjero", value: "0€" },
-                    { label: "Seguro equipaje", value: "2.000€" },
-                ],
-            },
-            {
-                nombre: "Travel Platinum",
-                tier: "Platinum",
-                cuota: "120€/año",
-                cuotaNote: "Bonificable con 30.000€ en compras",
-                cashback: "3%",
-                cashbackDesc: "en viajes (vuelos, hoteles, coches)",
-                limite: "30.000€",
-                seguroViaje: "500.000€",
-                ingresos: "60.000€/año",
-                perfil: "Grandes viajeros (+15 viajes/año)",
-                destacado: false,
-                beneficios: [
-                    "Acceso ilimitado a +1.000 salas VIP mundiales",
-                    "Fast Track en controles de seguridad",
-                    "Seguro equipaje hasta 5.000€ (electrónica incl.)",
-                    "Seguro coche de alquiler completo (CDW)",
-                    "Concierge Premium 24/7 en 25 idiomas",
-                    "Metal card · Puntos élite: 3 pts/€",
-                    "Upgrades automáticos en hoteles y aerolíneas",
-                ],
-                extras: [
-                    { label: "Salas VIP", value: "Ilimitado" },
-                    { label: "Retirada extranjero", value: "0€" },
-                    { label: "Seguro equipaje", value: "5.000€" },
-                ],
-            },
-        ],
-        comparativa: {
-            headers: ["Característica", "Classic", "Gold", "Platinum"],
-            rows: [
-                ["Cuota anual", "0€", "50€", "120€"],
-                ["Ingresos mínimos", "No requerido", "24.000€", "60.000€"],
-                ["Cashback viajes", "0,5%", "1,5%", "3%"],
-                ["Límite crédito", "3.000€", "12.000€", "30.000€"],
-                ["Seguro viaje", "30.000€", "100.000€", "500.000€"],
-                ["Seguro equipaje", "No", "2.000€", "5.000€"],
-                ["Salas VIP", "No", "4/año", "Ilimitado"],
-                ["Fast Track", "No", "No", "Sí"],
-                ["Concierge", "No", "Sí", "Premium 24/7"],
-                ["Puntos por €", "No", "2 (viajes)", "3"],
-            ],
-        },
     },
-    {
-        id: "ecommerce",
-        nombre: "Compras Online",
+    ecommerce: {
         icon: "ecommerce",
         color: "from-violet-600 to-purple-700",
         light: "bg-violet-50",
         accent: "text-violet-700",
         border: "border-violet-200",
         badge: "bg-violet-100 text-violet-800",
-        tarjetas: [
-            {
-                nombre: "E-Commerce Basic",
-                tier: "Basic",
-                cuota: "0€",
-                cuotaNote: "Sin coste",
-                cashback: "0,5%",
-                cashbackDesc: "en comercios adheridos",
-                limite: "2.000€",
-                seguroViaje: null,
-                seguroCompras: "300€",
-                ingresos: "No requerido",
-                perfil: "Compradores online ocasionales",
-                destacado: false,
-                beneficios: [
-                    "Tarjeta virtual con número diferente a la física",
-                    "Tarjetas de un solo uso ilimitadas",
-                    "Verificación 3D Secure en todas las compras",
-                    "Extensión de garantía 6 meses (electrónica)",
-                    "5-10% descuento en tiendas seleccionadas",
-                    "Alta 100% online en 5 minutos",
-                ],
-                extras: [
-                    { label: "Tarjetas virtuales", value: "Sí" },
-                    { label: "Protección precio", value: "No" },
-                    { label: "Extensión garantía", value: "6 meses" },
-                ],
-            },
-            {
-                nombre: "E-Commerce Advanced",
-                tier: "Advanced",
-                cuota: "20€/año",
-                cuotaNote: "Bonificable con 5.000€ en compras online",
-                cashback: "2%",
-                cashbackDesc: "en todas las compras online (sin límite)",
-                limite: "8.000€",
-                seguroViaje: null,
-                seguroCompras: "2.000€",
-                ingresos: "18.000€/año",
-                perfil: "Compradores frecuentes (5-15 compras/mes)",
-                destacado: true,
-                beneficios: [
-                    "Verificación biométrica (huella + facial)",
-                    "Generador ilimitado de tarjetas virtuales",
-                    "Protección de precio: reembolso si baja en 30 días",
-                    "Extensión de garantía 1 año en todos los productos",
-                    "Hasta 15% descuento en marcas premium online",
-                    "Envíos gratis en tiendas seleccionadas",
-                    "Control parental para tarjetas adicionales",
-                ],
-                extras: [
-                    { label: "Tarjetas virtuales", value: "Ilimitadas" },
-                    { label: "Protección precio", value: "30 días" },
-                    { label: "Extensión garantía", value: "1 año" },
-                ],
-            },
-            {
-                nombre: "E-Commerce Premium",
-                tier: "Premium",
-                cuota: "60€/año",
-                cuotaNote: "Bonificable con 15.000€ en compras online",
-                cashback: "4%",
-                cashbackDesc: "en compras online (sin límite ni techo)",
-                limite: "20.000€",
-                seguroViaje: null,
-                seguroCompras: "10.000€",
-                ingresos: "36.000€/año",
-                perfil: "Grandes compradores (+20 compras/mes)",
-                destacado: false,
-                beneficios: [
-                    "Autenticación multifactor avanzada + monitoreo dark web",
-                    "Cashback acreditado en 24h",
-                    "Protección de precio extendida: 90 días",
-                    "Extensión de garantía 2 años en todo",
-                    "Asesor personal de compras y personal shopper virtual",
-                    "Hasta 25% descuento en marcas de lujo",
-                    "Gestión devoluciones premium: nos encargamos de todo",
-                    "Hasta 5 tarjetas físicas + ilimitadas virtuales",
-                ],
-                extras: [
-                    { label: "Tarjetas virtuales", value: "Personalizables" },
-                    { label: "Protección precio", value: "90 días" },
-                    { label: "Extensión garantía", value: "2 años" },
-                ],
-            },
-        ],
-        comparativa: {
-            headers: ["Característica", "Basic", "Advanced", "Premium"],
-            rows: [
-                ["Cuota anual", "0€", "20€", "60€"],
-                ["Ingresos mínimos", "No requerido", "18.000€", "36.000€"],
-                ["Cashback", "0,5%", "2%", "4%"],
-                ["Límite crédito", "2.000€", "8.000€", "20.000€"],
-                ["Seguro compras", "300€", "2.000€", "10.000€"],
-                ["Extensión garantía", "6 meses", "1 año", "2 años"],
-                ["Protección precio", "No", "30 días", "90 días"],
-                ["Tarjetas virtuales", "Sí", "Ilimitadas", "Personalizables"],
-                ["Asesor personal", "No", "No", "Sí"],
-                ["Descuentos", "5-10%", "Hasta 15%", "Hasta 25%"],
-            ],
-        },
     },
-    {
-        id: "super",
-        nombre: "Supermercado",
+    super: {
         icon: "super",
         color: "from-emerald-600 to-green-700",
         light: "bg-emerald-50",
         accent: "text-emerald-700",
         border: "border-emerald-200",
         badge: "bg-emerald-100 text-emerald-800",
-        tarjetas: [
-            {
-                nombre: "SuperCompra Ahorro",
-                tier: "Ahorro",
-                cuota: "0€",
-                cuotaNote: "Sin coste",
-                cashback: "2%",
-                cashbackDesc: "en supermercados + 5% en partners",
-                limite: "500€/día (débito)",
-                seguroViaje: null,
-                ingresos: "No requerido",
-                perfil: "Familias con presupuesto ajustado",
-                destacado: false,
-                beneficios: [
-                    "5% descuento adicional en partners (Mercadona, Carrefour, Dia…)",
-                    "Vales descuento mensuales según gasto acumulado",
-                    "App de control con alertas de presupuesto",
-                    "Tickets digitales organizados automáticamente",
-                    "Programa Cashback Boost en productos seleccionados",
-                ],
-                extras: [
-                    { label: "Tarjetas adicionales", value: "No" },
-                    { label: "Financiación sin intereses", value: "No" },
-                    { label: "Cashback farmacias", value: "No" },
-                ],
-            },
-            {
-                nombre: "SuperCompra Familia",
-                tier: "Familia",
-                cuota: "15€/año",
-                cuotaNote: "Bonificable con 6.000€ en compras",
-                cashback: "3%",
-                cashbackDesc: "en súpers + 2% farmacias + 1,5% gasolineras",
-                limite: "5.000€",
-                seguroViaje: null,
-                ingresos: "20.000€ (familiar)",
-                perfil: "Familias 2-5 miembros, gasto medio",
-                destacado: true,
-                beneficios: [
-                    "Hasta 4 tarjetas adicionales sin coste para la familia",
-                    "10% descuento en supermercados partner",
-                    "Financiación sin intereses: 3-6 meses",
-                    "Seguro de compra de alimentos hasta 500€",
-                    "Envío a domicilio gratis en compras +50€",
-                    "Programa de puntos: 1 pto/€ (canjeables en súper)",
-                    "App familiar: gastos unificados + control parental",
-                ],
-                extras: [
-                    { label: "Tarjetas adicionales", value: "4 gratis" },
-                    { label: "Financiación sin intereses", value: "3-6 meses" },
-                    { label: "Cashback farmacias", value: "2%" },
-                ],
-            },
-            {
-                nombre: "SuperCompra Gourmet",
-                tier: "Gourmet",
-                cuota: "50€/año",
-                cuotaNote: "Bonificable con 15.000€ en compras",
-                cashback: "5%",
-                cashbackDesc: "en gourmet y delicatessen",
-                limite: "15.000€",
-                seguroViaje: null,
-                ingresos: "40.000€/año",
-                perfil: "Amantes de la gastronomía premium",
-                destacado: false,
-                beneficios: [
-                    "3% en tiendas especializadas, 2% marketplaces gourmet",
-                    "Hasta 20% descuento en tiendas gourmet y vinos selectos",
-                    "Catas de vino, showcookings y ferias VIP",
-                    "Sommelier virtual y asesor gastronómico personal",
-                    "Envío gratuito desde 30€ y servicio personal shopper",
-                    "Club de ventajas con niveles Bronze/Silver/Gold",
-                    "Seguro de productos premium hasta 2.000€",
-                ],
-                extras: [
-                    { label: "Tarjetas adicionales", value: "Sí" },
-                    { label: "Financiación sin intereses", value: "12 meses" },
-                    { label: "Eventos exclusivos", value: "Sí" },
-                ],
-            },
-        ],
-        comparativa: {
-            headers: ["Característica", "Ahorro", "Familia", "Gourmet"],
-            rows: [
-                ["Cuota anual", "0€", "15€", "50€"],
-                ["Ingresos mínimos", "No requerido", "20.000€", "40.000€"],
-                ["Cashback súpers", "2%", "3%", "5%"],
-                ["Límite", "500€/día (débito)", "5.000€", "15.000€"],
-                ["Tarjetas adicionales", "No", "4 gratis", "Sí"],
-                ["Financiación 0%", "No", "3-6 meses", "12 meses"],
-                ["Cashback farmacias", "No", "2%", "N/A"],
-                ["Puntos por €", "No", "1 pto/€", "2 ptos/€"],
-                ["Eventos exclusivos", "No", "No", "Sí"],
-                ["Envío gratis", "No", "+50€", "+30€"],
-            ],
-        },
     },
-    {
-        id: "ocio",
-        nombre: "Restaurante y Ocio",
+    ocio: {
         icon: "ocio",
         color: "from-rose-600 to-pink-700",
         light: "bg-rose-50",
         accent: "text-rose-700",
         border: "border-rose-200",
         badge: "bg-rose-100 text-rose-800",
-        tarjetas: [
-            {
-                nombre: "Ocio Joven",
-                tier: "Joven",
-                cuota: "0€",
-                cuotaNote: "Gratis (18-30 años)",
-                cashback: "2%",
-                cashbackDesc: "en restaurantes, bares y cafeterías",
-                limite: "1.500€",
-                seguroViaje: null,
-                ingresos: "No requerido",
-                perfil: "Jóvenes 18-30 años con vida social activa",
-                destacado: false,
-                beneficios: [
-                    "Cines 2x1 los martes + 15% resto de días",
-                    "Preventas exclusivas de conciertos y festivales",
-                    "Hasta 20% descuento en parques temáticos",
-                    "10% descuento en McDonald's, Burger King, KFC",
-                    "App social: divide cuentas, planes cercanos con IA",
-                    "Diseño personalizable (10 diseños o tu foto)",
-                    "Puntos x2 en ocio nocturno (viernes y sábados)",
-                ],
-                extras: [
-                    { label: "Concierge", value: "No" },
-                    { label: "Acceso spas", value: "No" },
-                    { label: "Restaurantes Michelin", value: "No" },
-                ],
-            },
-            {
-                nombre: "Ocio Lifestyle",
-                tier: "Lifestyle",
-                cuota: "30€/año",
-                cuotaNote: "Bonificable con 8.000€ en ocio",
-                cashback: "4%",
-                cashbackDesc: "en restaurantes + 3% ocio + 2% wellness",
-                limite: "8.000€",
-                seguroViaje: null,
-                ingresos: "24.000€/año",
-                perfil: "Profesionales 25-45 con vida social activa",
-                destacado: true,
-                beneficios: [
-                    "Concierge para reservas en restaurantes con lista de espera",
-                    "15% descuento en +500 restaurantes premium",
-                    "4 accesos/año a circuitos de spa incluidos",
-                    "15% descuento en gimnasios (DiR, Holmes Place…)",
-                    "12 experiencias/año: catas, menús degustación, eventos",
-                    "Programa de niveles Silver / Gold / Platinum",
-                    "Seguro de cancelación de reservas hasta 200€",
-                ],
-                extras: [
-                    { label: "Concierge", value: "Sí" },
-                    { label: "Acceso spas", value: "4/año" },
-                    { label: "Restaurantes Michelin", value: "Selección" },
-                ],
-            },
-            {
-                nombre: "Ocio Exclusive",
-                tier: "Exclusive",
-                cuota: "100€/año",
-                cuotaNote: "Bonificable con 25.000€ en compras",
-                cashback: "6%",
-                cashbackDesc: "en Michelin + 5% alta gastronomía",
-                limite: "25.000€",
-                seguroViaje: null,
-                ingresos: "60.000€/año",
-                perfil: "Amantes del lujo y la alta gastronomía",
-                destacado: false,
-                beneficios: [
-                    "Mesa garantizada en los restaurantes más exclusivos",
-                    "6 cenas anuales en restaurantes Michelin incluidas",
-                    "12 catas premium + 4 viajes gastronómicos al año",
-                    "Concierge Premium 24/7 en 25 idiomas",
-                    "Acceso VIP: F1, Fashion Week, galas benéficas",
-                    "Metal card con grabado personalizado",
-                    "Personal Chef Advisor para tus eventos",
-                    "Club privado de socios con networking exclusivo",
-                ],
-                extras: [
-                    { label: "Concierge", value: "Premium 24/7" },
-                    { label: "Acceso spas", value: "Ilimitado" },
-                    { label: "Restaurantes Michelin", value: "Acceso total" },
-                ],
-            },
-        ],
-        comparativa: {
-            headers: ["Característica", "Joven", "Lifestyle", "Exclusive"],
-            rows: [
-                ["Cuota anual", "0€", "30€", "100€"],
-                ["Edad", "18-30 años", "Sin límite", "Sin límite"],
-                ["Ingresos mínimos", "No requerido", "24.000€", "60.000€"],
-                ["Cashback restaurantes", "2%", "4%", "6% (Michelin)"],
-                ["Límite crédito", "1.500€", "8.000€", "25.000€"],
-                ["Concierge", "No", "Sí", "Premium 24/7"],
-                ["Acceso spas", "No", "4/año", "Ilimitado"],
-                ["Eventos exclusivos", "Preventas", "12/año", "Ilimitados"],
-                ["Puntos por €", "1", "2-4", "3"],
-                ["Tarjeta metal", "No", "Opcional", "Incluida"],
-            ],
-        },
     },
-    {
-        id: "clasicas",
-        nombre: "Clásicas",
+    clasicas: {
         icon: "clasicas",
         color: "from-slate-700 to-gray-900",
         light: "bg-slate-50",
         accent: "text-slate-700",
         border: "border-slate-200",
         badge: "bg-slate-100 text-slate-800",
-        tarjetas: [
-            {
-                nombre: "CaixaBank Clásica",
-                tier: "Clásica",
-                cuota: "0€",
-                cuotaNote: "Sin coste",
-                cashback: "0,5%",
-                cashbackDesc: "en todas las compras",
-                limite: "1.000€/día (débito)",
-                seguroViaje: "12.000€ (accidentes)",
-                ingresos: "No requerido",
-                perfil: "Uso diario sin complicaciones",
-                destacado: false,
-                beneficios: [
-                    "Tarjeta de débito: gasta solo lo que tienes",
-                    "Contactless, Apple Pay, Google Pay, Samsung Pay",
-                    "Bizum integrado para envío instantáneo",
-                    "Bloqueo temporal desde la app móvil",
-                    "Sistema antifraude con monitoreo 24/7",
-                    "Retiradas gratuitas en red CaixaBank",
-                ],
-                extras: [
-                    { label: "Financiación 0%", value: "No" },
-                    { label: "Comisión extranjero", value: "3% retiradas" },
-                    { label: "Salas VIP", value: "No" },
-                ],
-            },
-            {
-                nombre: "CaixaBank Oro",
-                tier: "Oro",
-                cuota: "40€/año",
-                cuotaNote: "0€ con nómina domiciliada",
-                cashback: "1,5%",
-                cashbackDesc: "en todas las compras sin excepción",
-                limite: "10.000€",
-                seguroViaje: "60.000€",
-                ingresos: "24.000€/año",
-                perfil: "Crédito flexible + seguros ampliados",
-                destacado: true,
-                beneficios: [
-                    "Seguro de compras hasta 1.000€ por artículo (90 días)",
-                    "Financiación sin intereses hasta 12 meses (+300€)",
-                    "0€ en compras y retiradas en todo el mundo",
-                    "Seguro de viaje hasta 60.000€ con asistencia",
-                    "Programa de puntos: 1 pto/2€ + 2.000 pts bienvenida",
-                    "Tarjeta de emergencia en viajes",
-                ],
-                extras: [
-                    { label: "Financiación 0%", value: "Hasta 12 meses" },
-                    { label: "Comisión extranjero", value: "0€" },
-                    { label: "Salas VIP", value: "No" },
-                ],
-            },
-            {
-                nombre: "CaixaBank Infinite",
-                tier: "Infinite",
-                cuota: "200€/año",
-                cuotaNote: "Bonificable con 50.000€ en compras",
-                cashback: "3%",
-                cashbackDesc: "en todas las compras (sin techo)",
-                limite: "Desde 30.000€ (flexible)",
-                seguroViaje: "1.000.000€",
-                ingresos: "90.000€ o patrimonio 150.000€",
-                perfil: "Clientes premium de alto patrimonio",
-                destacado: false,
-                beneficios: [
-                    "Acceso ilimitado a +1.300 salas VIP (Priority Pass Prestige)",
-                    "Concierge Premium 24/7 en 25 idiomas",
-                    "Personal Banker dedicado con línea directa",
-                    "Seguro de compras hasta 5.000€ + 1 año garantía extra",
-                    "Financiación sin intereses hasta 18 meses (+1.000€)",
-                    "Metal card con grabado personalizado",
-                    "Bonus: +500€ si gastas +50.000€/año",
-                    "Experiencias: vuelos Business, hoteles 5★, eventos VIP",
-                ],
-                extras: [
-                    { label: "Financiación 0%", value: "Hasta 18 meses" },
-                    { label: "Comisión extranjero", value: "0€" },
-                    { label: "Salas VIP", value: "Ilimitado" },
-                ],
-            },
-        ],
-        comparativa: {
-            headers: ["Característica", "Clásica", "Oro", "Infinite"],
-            rows: [
-                ["Cuota anual", "0€", "40€ (0€ nómina)", "200€"],
-                ["Ingresos mínimos", "No requerido", "24.000€", "90.000€ / 150k€"],
-                ["Tipo", "Débito", "Crédito", "Crédito Premium"],
-                ["Cashback", "0,5%", "1,5%", "3%"],
-                ["Límite", "1.000€/día", "10.000€", "Desde 30.000€"],
-                ["Seguro viaje", "12.000€", "60.000€", "1.000.000€"],
-                ["Seguro compras", "No", "1.000€", "5.000€"],
-                ["Financiación 0%", "No", "12 meses", "18 meses"],
-                ["Comisión extranjero", "3% retiradas", "0€", "0€"],
-                ["Concierge", "No", "No", "Premium 24/7"],
-                ["Salas VIP", "No", "No", "Ilimitado"],
-                ["Personal Banker", "No", "No", "Sí"],
-            ],
-        },
     },
-]
+}
+
+function mergeStyles(categories) {
+    return categories.map((cat) => ({
+        ...cat,
+        ...CATEGORY_STYLES[cat.id],
+    }))
+}
 
 /* ─── Componentes auxiliares ─── */
 
@@ -714,8 +221,10 @@ function ComparisonTable({ comparativa, cat }) {
 export default function CardsPage() {
     const router = useRouter()
     const [user, setUser] = useState(null)
+    const [categorias, setCategorias] = useState([])
     const [activeCategory, setActiveCategory] = useState("viajes")
     const [showComparison, setShowComparison] = useState(false)
+    const [loading, setLoading] = useState(true)
 
     useEffect(() => {
         const userData = localStorage.getItem('user')
@@ -725,9 +234,33 @@ export default function CardsPage() {
             return
         }
         setUser(JSON.parse(userData))
+
+        fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/cards/catalog`)
+            .then((res) => res.json())
+            .then((data) => {
+                setCategorias(mergeStyles(data))
+                setLoading(false)
+            })
+            .catch(() => setLoading(false))
     }, [router])
 
-    const activeCat = CATEGORIAS.find((c) => c.id === activeCategory)
+    const activeCat = categorias.find((c) => c.id === activeCategory)
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600" />
+            </div>
+        )
+    }
+
+    if (!categorias.length) {
+        return (
+            <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 flex items-center justify-center">
+                <p className="text-gray-500">No se pudieron cargar las tarjetas.</p>
+            </div>
+        )
+    }
 
     return (
         <>
@@ -763,7 +296,7 @@ export default function CardsPage() {
                 {/* Category Tabs */}
                 <div className="flex justify-center mb-10">
                     <div className="inline-flex flex-wrap justify-center gap-2 p-1.5 bg-white rounded-2xl shadow-sm border border-gray-200">
-                        {CATEGORIAS.map((cat) => (
+                        {categorias.map((cat) => (
                             <button
                                 key={cat.id}
                                 onClick={() => {
