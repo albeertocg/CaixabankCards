@@ -102,7 +102,10 @@ class ChatService:
             The agent's response text.
         """
         logger.debug("Mensaje usuario: %s", message)
-        guardrail_result = self.guardrail_service.validate(message)
+        guardrail_result = self.guardrail_service.validate(
+            message,
+            is_followup=True,
+        )
         logger.debug(
             "Guardrail allowed=%s response=%s",
             guardrail_result.allowed,

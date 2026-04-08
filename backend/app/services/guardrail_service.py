@@ -22,11 +22,20 @@ PERSIST_DIR = str(_AGENT_DIR / "agent" / "vectorstore_data")
 
 
 class GuardrailService:
-    def __init__(self, threshold: float = 0.45, max_results: int = 3) -> None:
+    # Threshold for first messages in a conversation (stricter)
+    DEFAULT_THRESHOLD = 0.35
+    # Relaxed threshold for follow-up messages in an existing session
+    FOLLOWUP_THRESHOLD = 0.42
+
+    def __init__(
+        self,
+        threshold: float = DEFAULT_THRESHOLD,
+        max_results: int = 3,
+    ) -> None:
         self.threshold = threshold
         self.max_results = max_results
 
-    def validate(self, message: str) -> GuardrailResult:
+    def validate(self, message: str, *, is_followup: bool = False) -> GuardrailResult:
         text = message.strip()
 
         if not text:
@@ -62,14 +71,16 @@ class GuardrailService:
             )
 
         best_distance = results[0]["distance"]
+        effective_threshold = self.FOLLOWUP_THRESHOLD if is_followup else self.threshold
 
         logger.debug(
-            "message=%s best_distance=%.4f threshold=%s",
+            "message=%s best_distance=%.4f threshold=%.2f followup=%s",
             text,
             best_distance,
-            self.threshold,
+            effective_threshold,
+            is_followup,
         )
-        if best_distance > self.threshold:
+        if best_distance > effective_threshold:
             return GuardrailResult(
                 allowed=False,
                 response=self.out_of_scope_response(),
