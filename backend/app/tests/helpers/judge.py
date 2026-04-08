@@ -87,11 +87,21 @@ def judge(
     try:
         data = json.loads(raw)
     except json.JSONDecodeError:
-        logger.error("Judge returned invalid JSON: %s", raw)
-        return {
-            c["name"]: {"pass": False, "reason": "Judge returned invalid JSON"}
-            for c in criteria
-        }
+        # Gemini sometimes returns smart/curly quotes — normalize them
+        sanitized = (
+            raw.replace("\u201c", '"')
+            .replace("\u201d", '"')
+            .replace("\u2018", "'")
+            .replace("\u2019", "'")
+        )
+        try:
+            data = json.loads(sanitized)
+        except json.JSONDecodeError:
+            logger.error("Judge returned invalid JSON: %s", raw)
+            return {
+                c["name"]: {"pass": False, "reason": "Judge returned invalid JSON"}
+                for c in criteria
+            }
 
     results: dict[str, dict] = {}
     for item in data.get("results", []):
