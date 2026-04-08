@@ -8,6 +8,7 @@ from collections import defaultdict
 from datetime import datetime, timezone
 
 from app.repositories.user_repository import UserRepository
+from app.services.sanitizer import sanitize_text
 
 # Mapeo de categoría de transacción → categoría de tarjeta
 _TX_TO_CARD_CATEGORY: dict[str, str] = {
@@ -52,12 +53,18 @@ def _build_profile(user: dict) -> dict:
     """
     age = _calculate_age(user.get("birth_date"))
     return {
-        "nombre": f"{user.get('first_name', '')} {user.get('last_name', '')}".strip(),
+        "nombre": sanitize_text(
+            f"{user.get('first_name', '')} {user.get('last_name', '')}".strip()
+        ),
         "edad": age,
         "ingreso_anual": user.get("annual_income", 0),
-        "situacion_laboral": user.get("employment_status", "desconocido"),
-        "nivel_educativo": user.get("education_level", "desconocido"),
-        "estado_civil": user.get("marital_status", "desconocido"),
+        "situacion_laboral": sanitize_text(
+            str(user.get("employment_status", "desconocido"))
+        ),
+        "nivel_educativo": sanitize_text(
+            str(user.get("education_level", "desconocido"))
+        ),
+        "estado_civil": sanitize_text(str(user.get("marital_status", "desconocido"))),
         "dependientes": user.get("num_dependents", 0),
         "meses_como_cliente": user.get("customer_tenure_months", 0),
         "productos_contratados": len(user.get("contracted_products", [])),
@@ -94,7 +101,11 @@ def _analyze_transactions(transactions: list[dict]) -> dict:
         cat = tx.get("category", "otros_gastos")
         tx_type = tx.get("transaction_type", "gasto")
         if tx.get("date"):
-            dates.append(tx["date"] if isinstance(tx["date"], datetime) else datetime.fromisoformat(str(tx["date"])))
+            dates.append(
+                tx["date"]
+                if isinstance(tx["date"], datetime)
+                else datetime.fromisoformat(str(tx["date"]))
+            )
 
         if tx_type == "gasto":
             spending_by_cat[cat] += amount
@@ -109,8 +120,12 @@ def _analyze_transactions(transactions: list[dict]) -> dict:
     else:
         months = 1.0
 
-    monthly_by_cat = {cat: round(total / months, 2) for cat, total in spending_by_cat.items()}
-    sorted_cats = sorted(monthly_by_cat.items(), key=lambda spending_info: spending_info[1], reverse=True)
+    monthly_by_cat = {
+        cat: round(total / months, 2) for cat, total in spending_by_cat.items()
+    }
+    sorted_cats = sorted(
+        monthly_by_cat.items(), key=lambda spending_info: spending_info[1], reverse=True
+    )
 
     # Agregar por categoría de tarjeta
     card_cat_spend: dict[str, float] = defaultdict(float)
@@ -118,7 +133,9 @@ def _analyze_transactions(transactions: list[dict]) -> dict:
         card_cat = _TX_TO_CARD_CATEGORY.get(cat, "clasica")
         card_cat_spend[card_cat] += amount
 
-    dominant = max(card_cat_spend, key=card_cat_spend.get) if card_cat_spend else "clasica"
+    dominant = (
+        max(card_cat_spend, key=card_cat_spend.get) if card_cat_spend else "clasica"
+    )
 
     return {
         "tiene_historial": True,
@@ -164,11 +181,17 @@ def _format_context(profile: dict, tx_analysis: dict) -> str:
             f"Período: {tx_analysis['meses_analizados']} meses ({tx_analysis['num_transacciones']} transacciones)"
         )
         lines.append(f"Gasto mensual medio: {tx_analysis['gasto_mensual_total']:,.2f}€")
-        lines.append(f"Ingreso mensual medio: {tx_analysis['ingreso_mensual_total']:,.2f}€")
+        lines.append(
+            f"Ingreso mensual medio: {tx_analysis['ingreso_mensual_total']:,.2f}€"
+        )
         lines.append("")
         lines.append("Distribución de gasto mensual por categoría:")
         for cat, amount in tx_analysis["top_categorias"]:
-            pct = (amount / tx_analysis["gasto_mensual_total"] * 100) if tx_analysis["gasto_mensual_total"] > 0 else 0
+            pct = (
+                (amount / tx_analysis["gasto_mensual_total"] * 100)
+                if tx_analysis["gasto_mensual_total"] > 0
+                else 0
+            )
             lines.append(f"  - {cat}: {amount:,.2f}€/mes ({pct:.1f}%)")
         lines.append("")
         lines.append(f"Patrón dominante: {tx_analysis['patron_dominante'].upper()}")
@@ -198,4 +221,8 @@ def _calculate_age(birth_date: datetime | str | None) -> int:
     if isinstance(birth_date, str):
         birth_date = datetime.fromisoformat(birth_date)
     today = datetime.now(timezone.utc)
-    return today.year - birth_date.year - ((today.month, today.day) < (birth_date.month, birth_date.day))
+    return (
+        today.year
+        - birth_date.year
+        - ((today.month, today.day) < (birth_date.month, birth_date.day))
+    )
