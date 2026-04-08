@@ -6,6 +6,7 @@ from app.agent.agent import runner, session_service
 from app.agent.context import build_user_context
 from app.repositories.chat_repository import ChatRepository
 from app.services.guardrail_service import GuardrailService
+from app.services.sanitizer import sanitize_text, contains_injection
 
 logger = logging.getLogger(__name__)
 
@@ -69,8 +70,17 @@ class ChatService:
 
     async def send_message(self, session_id: str, user_id: str, message: str) -> str:
         logger.debug("Mensaje usuario: %s", message)
+
+        if contains_injection(message):
+            logger.warning("Prompt injection detectado: %s", message[:100])
+            return (
+                "Solo puedo ayudarte con consultas relacionadas con tarjetas CaixaBank. "
+                "Puedo explicarte beneficios, comisiones, requisitos o recomendarte una tarjeta."
+            )
+
+        clean_message = sanitize_text(message)
         guardrail_result = self.guardrail_service.validate(
-            message,
+            clean_message,
             is_followup=True,
         )
         logger.debug(
@@ -82,11 +92,11 @@ class ChatService:
         if not guardrail_result.allowed:
             return guardrail_result.response
 
-        await self.chat_repo.save_message(session_id, user_id, "user", message)
+        await self.chat_repo.save_message(session_id, user_id, "user", clean_message)
 
         content = types.Content(
             role="user",
-            parts=[types.Part.from_text(text=message)],
+            parts=[types.Part.from_text(text=clean_message)],
         )
 
         response_text = ""
