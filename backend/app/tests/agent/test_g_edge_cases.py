@@ -78,13 +78,21 @@ class TestEdgeCases:
                 {
                     "name": "maneja_ambiguedad",
                     "instruction": (
-                        "Ante una pregunta ambigua ('¿Cuánto cuesta?') sin tarjeta "
-                        "especificada, el agente pide aclaración o responde en base "
-                        "al contexto de la conversación. No inventa una tarjeta al azar."
+                        "Ante la pregunta ambigua '¿Cuánto cuesta?' (sin nombrar "
+                        "tarjeta), el agente hace UNA de estas dos cosas: "
+                        "(a) pide aclaración sobre qué tarjeta se refiere, o "
+                        "(b) responde dando información de coste/comisiones de una "
+                        "tarjeta que encaje con el perfil del usuario (tiene sentido "
+                        "según el contexto de la conversación). "
+                        "En NINGÚN caso ignora la pregunta ni inventa datos."
                     ),
                 },
             ],
-            context="Carlos pregunta '¿Cuánto cuesta?' sin especificar tarjeta.",
+            context=(
+                "Carlos (perfil viajero frecuente, ingresos 55k) pregunta "
+                "'¿Cuánto cuesta?' al inicio de la sesión sin especificar tarjeta. "
+                "El agente conoce su perfil porque fue inyectado al crear la sesión."
+            ),
         )
 
     async def test_g4_multiple_questions_one_message(
