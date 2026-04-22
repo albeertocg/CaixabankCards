@@ -18,7 +18,7 @@ export default function ChatWidget({ userId }) {
     const sessionIdRef = useRef(null)
 
     useEffect(() => {
-        if (!userId || wsRef.current) return
+        if (!userId) return
 
         const storedSid = sessionStorage.getItem(`chat_session_${userId}`)
         const wsUrl = storedSid
@@ -28,10 +28,14 @@ export default function ChatWidget({ userId }) {
         setStatus("connecting")
         const ws = new WebSocket(wsUrl)
         wsRef.current = ws
+        let cancelled = false
 
-        ws.onopen = () => setStatus("connected")
+        ws.onopen = () => {
+            if (!cancelled) setStatus("connected")
+        }
 
         ws.onmessage = (event) => {
+            if (cancelled) return
             const data = JSON.parse(event.data)
 
             if (data.type === "greeting") {
@@ -48,13 +52,16 @@ export default function ChatWidget({ userId }) {
         }
 
         ws.onclose = () => {
-            wsRef.current = null
-            setStatus("error")
+            if (!cancelled) {
+                wsRef.current = null
+                setStatus("error")
+            }
         }
 
         ws.onerror = () => ws.close()
 
         return () => {
+            cancelled = true
             ws.close()
             wsRef.current = null
         }
@@ -70,10 +77,11 @@ export default function ChatWidget({ userId }) {
 
     const sendMessage = () => {
         const text = input.trim()
-        if (!text || status !== "connected" || waiting) return
+        const ws = wsRef.current
+        if (!text || !ws || ws.readyState !== WebSocket.OPEN || waiting) return
 
         setMessages((prev) => [...prev, { role: "user", text }])
-        wsRef.current.send(text)
+        ws.send(text)
         setInput("")
         setWaiting(true)
     }
