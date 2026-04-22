@@ -269,7 +269,7 @@ export default function CardsPage() {
             <header className="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-sm">
                 <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
                     <div className="flex items-center gap-4">
-                        <img src="/images/caixabank.png" alt="CaixaBank" className="h-8" />
+                        <img src="/images/caixabank.png" alt="CaixaBank" className="h-14 w-auto object-contain" />
                         <span className="hidden sm:inline text-gray-300">|</span>
                         <h1 className="hidden sm:inline text-lg font-semibold text-gray-800">Tarjetas</h1>
                     </div>

@@ -10,7 +10,7 @@ export default function HomePage() {
           <img
             src="/images/caixabank.png"
             alt="CaixaBank"
-            className="h-9"
+            className="h-14"
           />
           <Link
             href="/login"
