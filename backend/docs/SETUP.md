@@ -3,74 +3,117 @@
 ## Requisitos Previos
 
 - **Python:** 3.12+
-- **MongoDB:** Local o Atlas (cloud)
-- **Virtual Environment:** venv
+- **MongoDB:** local o Atlas
+- **Google API key** (para el agente Gemini)
+- **Node.js 18+** (solo si también vas a correr el frontend)
 
-## Pasos de Instalación
+## Pasos de Instalación (Backend)
 
 ### 1. Clonar el repositorio
 
 ```bash
-git clone https://github.com/yourusername/CaixabankCards.git
+git clone <repo-url>
 cd CaixabankCards
 ```
 
 ### 2. Crear y activar virtual environment
 
-```bash
-# Crear venv
-python3 -m venv venv
+Desde la raíz del repo:
 
-# Activar venv
-source venv/bin/activate  # En Linux/Mac
-# o
-venv\Scripts\activate  # En Windows
+```bash
+python -m venv venv
+
+# Linux / macOS
+source venv/bin/activate
+
+# Windows (PowerShell)
+venv\Scripts\activate
 ```
 
 ### 3. Instalar dependencias
 
 ```bash
+cd backend
 pip install -r requirements.txt
+# o, equivalente:
+make install
 ```
 
 ### 4. Configurar variables de entorno
 
-Copiar `.env.example` a `.env`:
+Copia `.env.example` a `.env` dentro de `backend/`:
 
 ```bash
 cp .env.example .env
 ```
 
-Completar las variables necesarias:
+Variables reales esperadas (ver `backend/.env.example`):
 
 ```env
 # MongoDB
-MONGODB_URL=mongodb://localhost:27017/caixabank_cards
+MONGO_URI=mongodb+srv://user:password@cluster.mongodb.net/caixabank_cards
+MONGO_DB_NAME=caixabank_cards
 
-...
+# JWT
+JWT_SECRET_KEY=tu_clave_secreta_aqui
+JWT_ALGORITHM=HS256
+JWT_EXPIRATION_MINUTES=60
+
+# Google (agente Gemini)
+GOOGLE_API_KEY=tu_api_key_aqui
+
+# CORS
+CORS_ORIGINS=["http://localhost:3000"]
 ```
 
-### 5. Ejecutar la aplicación
+### 5. (Opcional) Sembrar usuarios de prueba
+
+Para disponer de 5 perfiles de usuario con transacciones:
 
 ```bash
-fastapi dev app/main
+python -m scripts.seed_test_users
 ```
 
-La API estará disponible en: **http://localhost:8000**
+Todos comparten la contraseña `Test1234!`. Ejemplos:
+- `test.viajero@ejemplo.com`
+- `test.shopper@ejemplo.com`
+- `test.foodie@ejemplo.com`
+- `test.jubilado@ejemplo.com`
+- `test.estudiante@ejemplo.com`
 
-Docs interactivos: **http://localhost:8000/docs**
+### 6. Ejecutar la aplicación
+
+```bash
+fastapi dev app/main.py
+# o:
+make dev
+```
+
+- API: **http://localhost:8000**
+- Swagger: **http://localhost:8000/docs**
+- ReDoc: **http://localhost:8000/redoc**
+
+### 7. (Opcional) Lanzar la ADK Web UI
+
+```bash
+make adk
+```
+UI del agente en `http://localhost:8765`.
+
+## Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+Disponible en **http://localhost:3000**.
 
 ## Verificar Instalación
 
 ```bash
-# Debe mostrar Python 3.12.x
-python --version
-
-# Debe mostrar pip desde venv/
-pip --version
-
-# Ver paquetes instalados
-pip list
+python --version      # 3.12+
+pip list              # comprobar fastapi, motor, google-adk, chromadb...
 ```
 
 ## Siguiente Paso
