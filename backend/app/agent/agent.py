@@ -9,6 +9,7 @@ import os
 from google.adk.agents import Agent
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
+from google.genai import types
 
 from app.agent.tools.gower_tool import search_similar_cards
 from app.agent.tools.rag_tool import retrieve_card_documentation
@@ -16,6 +17,32 @@ from app.agent.tools.eligibility_tool import check_card_eligibility
 from app.config.settings import settings
 
 os.environ.setdefault("GOOGLE_API_KEY", settings.google_api_key)
+
+# Safety Settings de Gemini con bloqueo estricto.
+# BLOCK_LOW_AND_ABOVE bloquea cualquier contenido con probabilidad de daño
+# baja, media o alta — el umbral más estricto disponible.
+SAFETY_SETTINGS: list[types.SafetySetting] = [
+    types.SafetySetting(
+        category=types.HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+        threshold=types.HarmBlockThreshold.BLOCK_LOW_AND_ABOVE,
+    ),
+    types.SafetySetting(
+        category=types.HarmCategory.HARM_CATEGORY_HARASSMENT,
+        threshold=types.HarmBlockThreshold.BLOCK_LOW_AND_ABOVE,
+    ),
+    types.SafetySetting(
+        category=types.HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+        threshold=types.HarmBlockThreshold.BLOCK_LOW_AND_ABOVE,
+    ),
+    types.SafetySetting(
+        category=types.HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+        threshold=types.HarmBlockThreshold.BLOCK_LOW_AND_ABOVE,
+    ),
+]
+
+GENERATE_CONTENT_CONFIG = types.GenerateContentConfig(
+    safety_settings=SAFETY_SETTINGS,
+)
 
 SYSTEM_PROMPT = """\
 Eres un asesor financiero de CaixaBank especializado en tarjetas bancarias.
@@ -64,6 +91,7 @@ root_agent = card_recommendation_agent = Agent(
     description="Asesor de tarjetas CaixaBank que recomienda la tarjeta más adecuada basándose en el perfil del cliente y sus hábitos de gasto.",
     instruction=SYSTEM_PROMPT,
     tools=[search_similar_cards, retrieve_card_documentation, check_card_eligibility],
+    generate_content_config=GENERATE_CONTENT_CONFIG,
 )
 
 session_service = InMemorySessionService()

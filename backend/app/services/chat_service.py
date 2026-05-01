@@ -10,6 +10,22 @@ from app.services.sanitizer import sanitize_text, contains_injection
 
 logger = logging.getLogger(__name__)
 
+# Finish reasons que indican que Gemini bloqueó la respuesta por los
+# safety settings o filtros de contenido. Cuando esto ocurre, event.content
+# llega vacío y debemos devolver un mensaje claro al usuario.
+_SAFETY_BLOCKED_REASONS: set[types.FinishReason] = {
+    types.FinishReason.SAFETY,
+    types.FinishReason.PROHIBITED_CONTENT,
+    types.FinishReason.SPII,
+    types.FinishReason.BLOCKLIST,
+}
+
+_SAFETY_BLOCKED_RESPONSE = (
+    "No puedo responder a esa consulta. Solo puedo ayudarte con tarjetas "
+    "CaixaBank: beneficios, comisiones, requisitos o recomendaciones según "
+    "tu perfil."
+)
+
 
 class ChatService:
     def __init__(self) -> None:
@@ -100,13 +116,27 @@ class ChatService:
         )
 
         response_text = ""
+        blocked_by_safety = False
         async for event in runner.run_async(
             user_id=user_id,
             session_id=session_id,
             new_message=content,
         ):
-            if event.is_final_response() and event.content and event.content.parts:
-                response_text = event.content.parts[0].text
+            if not event.is_final_response():
+                continue
+
+            if event.finish_reason in _SAFETY_BLOCKED_REASONS:
+                blocked_by_safety = True
+                logger.warning(
+                    "Respuesta bloqueada por safety filter: reason=%s",
+                    event.finish_reason,
+                )
+
+            if event.content and event.content.parts:
+                response_text = event.content.parts[0].text or ""
+
+        if blocked_by_safety or not response_text:
+            response_text = _SAFETY_BLOCKED_RESPONSE
 
         await self.chat_repo.save_message(
             session_id, user_id, "assistant", response_text
